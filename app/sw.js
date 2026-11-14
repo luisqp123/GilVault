@@ -1,6 +1,6 @@
 // Service worker: la app abre sin conexión (los datos vienen de la última copia guardada).
-const VERSION = 'gilvault-v1';
-const ARCHIVOS = ['./', 'index.html', 'style.css', 'app.js', 'sprites.js', 'demo.js', 'manifest.webmanifest',
+const VERSION = 'gilvault-v3';
+const ARCHIVOS = ['./', 'index.html', 'style.css?v=3', 'app.js?v=3', 'sprites.js?v=3', 'demo.js?v=3', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -18,8 +18,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return; // la API (POST) siempre va a la red
   const url = new URL(req.url);
   if (url.origin === location.origin) {
-    // Red primero para tener siempre la última versión; caché si no hay conexión.
-    e.respondWith(fetch(req).then(r => {
+    // Red primero (revalidando la caché HTTP) para tener siempre la última versión; caché si no hay conexión.
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then(r => {
       const copia = r.clone(); caches.open(VERSION).then(c => c.put(req, copia)); return r;
     }).catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
   } else if (/fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)) {
