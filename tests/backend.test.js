@@ -113,6 +113,14 @@ const js = ctx.doGet({ parameter: { callback: 'gv_cb1', payload: JSON.stringify(
 assert.ok(/^gv_cb1\(\{"ok":true/.test(js), 'JSONP responde: ' + js);
 assert.ok(/Token incorrecto/.test(ctx.doGet({ parameter: { callback: 'x', payload: '{"token":"no"}' } }).texto));
 assert.ok(/callback inválido/.test(ctx.doGet({ parameter: { callback: 'alert(1)//' } }).texto));
-assert.strictEqual(JSON.parse(ctx.doGet({ parameter: {} }).texto).version, 2);
+assert.strictEqual(JSON.parse(ctx.doGet({ parameter: {} }).texto).version, 3);
+// MacroDroid por GET, con espacios sobrantes en token y accion.
+const g1 = JSON.parse(ctx.doGet({ parameter: { token: ' ' + token + ' ', accion: 'notificacion ', titulo: 'Bar', texto: 'Hai pagato 2,50 € con la carta *1234 il 11.21 alle ore 08:00 da Bar Roma.' } }).texto);
+assert.ok(g1.ok && g1.movimiento && g1.movimiento.monto === 2.5, 'GET registra: ' + JSON.stringify(g1));
+// Rechazos anotados en la hoja Notificaciones.
+const nLog = hojas.Notificaciones.getLastRow();
+ctx.doGet({ parameter: { token: 'malo', accion: 'notificacion', titulo: 'x', texto: 'y' } });
+ctx.doGet({ parameter: { token, accion: 'notificación', titulo: 'x', texto: 'y' } });
+assert.strictEqual(hojas.Notificaciones.getLastRow(), nLog + 2, 'rechazos anotados');
 
 console.log('Backend: todas las pruebas OK');

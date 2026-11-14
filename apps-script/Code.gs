@@ -182,7 +182,7 @@ function verToken() {
 // API web
 // ---------------------------------------------------------------------------
 
-var VERSION_BACKEND = 2;
+var VERSION_BACKEND = 3;
 
 /**
  * GET:
@@ -200,6 +200,8 @@ function doGet(e) {
     return ContentService.createTextOutput(p.callback + '(' + JSON.stringify(res) + ');')
       .setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
+  // MacroDroid puede enviar la notificación como GET: ?token=...&accion=notificacion&titulo=...&texto=...
+  if (p.accion || p.token) return json_(procesar_(p));
   return json_({ ok: true, app: 'GilVault', version: VERSION_BACKEND, msg: 'Usa POST.' });
 }
 
@@ -223,7 +225,13 @@ function doPost(e) {
 /** Ejecuta una acción de la API y devuelve un objeto (nunca lanza error). */
 function procesar_(body) {
   var token = PropertiesService.getScriptProperties().getProperty('TOKEN');
-  if (!token || body.token !== token) return { ok: false, error: 'Token incorrecto' };
+  body.token = String(body.token || '').trim();
+  body.accion = String(body.accion || '').trim();
+  if (!token || body.token !== token) {
+    // Solo se anota si parece un intento de enviar una notificación (para poder diagnosticar MacroDroid).
+    if (body.accion || body.titulo || body.texto) anotarRechazo_(body, 'Rechazada: token incorrecto');
+    return { ok: false, error: 'Token incorrecto' };
+  }
 
   var lock = LockService.getScriptLock();
   try {
@@ -239,13 +247,22 @@ function procesar_(body) {
       case 'reporte': return accionReporte_(body);
       case 'marcarVisto': return accionMarcarVisto_(body);
       case 'presupuestos': return accionPresupuestos_(body);
-      default: return { ok: false, error: 'Acción desconocida: ' + body.accion };
+      default:
+        anotarRechazo_(body, 'Rechazada: acción desconocida "' + body.accion + '" (debe ser: notificacion)');
+        return { ok: false, error: 'Acción desconocida: ' + body.accion };
     }
   } catch (err) {
     return { ok: false, error: String(err && err.message || err) };
   } finally {
     try { lock.releaseLock(); } catch (err) { }
   }
+}
+
+function anotarRechazo_(b, motivo) {
+  try {
+    obtenerHoja_(HOJA_LOG, ['Recibido', 'App', 'Título', 'Texto', 'Resultado'])
+      .appendRow([new Date(), '', String(b.titulo || '').slice(0, 200), String(b.texto || '').slice(0, 500), motivo]);
+  } catch (err) { }
 }
 
 function accionNotificacion_(b) {
