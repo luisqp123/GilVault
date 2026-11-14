@@ -1,0 +1,9 @@
+# Configuración de Netlify: publica la carpeta app/ tal cual (sin compilación).
+[build]
+  publish = "app"
+  command = ""
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
