@@ -182,12 +182,29 @@ function verToken() {
 // API web
 // ---------------------------------------------------------------------------
 
-function doGet() {
-  return json_({ ok: true, app: 'GilVault', msg: 'Usa POST.' });
+var VERSION_BACKEND = 2;
+
+/**
+ * GET:
+ *  - sin parámetros: comprobación rápida desde el navegador.
+ *  - ?callback=fn&payload={...}: la misma API que POST, en formato JSONP.
+ *    La app lo usa como respaldo si el navegador bloquea la vía POST.
+ */
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.callback) {
+    if (!/^[A-Za-z_$][\w$]{0,40}$/.test(p.callback)) return json_({ ok: false, error: 'callback inválido' });
+    var body = {};
+    try { body = JSON.parse(p.payload || '{}'); } catch (err) { body = {}; }
+    var res = procesar_(body);
+    return ContentService.createTextOutput(p.callback + '(' + JSON.stringify(res) + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return json_({ ok: true, app: 'GilVault', version: VERSION_BACKEND, msg: 'Usa POST.' });
 }
 
 /**
- * Todas las peticiones llegan por POST: { token, accion, ...datos }.
+ * POST: { token, accion, ...datos }.
  * La app envía JSON (Content-Type text/plain para evitar CORS preflight);
  * MacroDroid envía parámetros en la URL (?token=...&accion=notificacion&titulo=...&texto=...).
  */
@@ -200,30 +217,34 @@ function doPost(e) {
   }
   var params = (e && e.parameter) || {};
   Object.keys(params).forEach(function (k) { if (body[k] === undefined) body[k] = params[k]; });
+  return json_(procesar_(body));
+}
 
+/** Ejecuta una acción de la API y devuelve un objeto (nunca lanza error). */
+function procesar_(body) {
   var token = PropertiesService.getScriptProperties().getProperty('TOKEN');
-  if (!token || body.token !== token) return json_({ ok: false, error: 'Token incorrecto' });
+  if (!token || body.token !== token) return { ok: false, error: 'Token incorrecto' };
 
   var lock = LockService.getScriptLock();
-  lock.waitLock(20000);
   try {
+    lock.waitLock(20000);
     switch (body.accion) {
-      case 'ping': return json_({ ok: true });
-      case 'notificacion': return json_(accionNotificacion_(body));
-      case 'probar': return json_({ ok: true, resultado: interpretarNotificacion(body.titulo, body.texto, new Date(), cargarReglas_()) });
-      case 'datos': return json_(accionDatos_(body));
-      case 'agregar': return json_(accionAgregar_(body));
-      case 'editar': return json_(accionEditar_(body));
-      case 'borrar': return json_(accionBorrar_(body));
-      case 'reporte': return json_(accionReporte_(body));
-      case 'marcarVisto': return json_(accionMarcarVisto_(body));
-      case 'presupuestos': return json_(accionPresupuestos_(body));
-      default: return json_({ ok: false, error: 'Acción desconocida: ' + body.accion });
+      case 'ping': return { ok: true, version: VERSION_BACKEND };
+      case 'notificacion': return accionNotificacion_(body);
+      case 'probar': return { ok: true, resultado: interpretarNotificacion(body.titulo, body.texto, new Date(), cargarReglas_()) };
+      case 'datos': return accionDatos_(body);
+      case 'agregar': return accionAgregar_(body);
+      case 'editar': return accionEditar_(body);
+      case 'borrar': return accionBorrar_(body);
+      case 'reporte': return accionReporte_(body);
+      case 'marcarVisto': return accionMarcarVisto_(body);
+      case 'presupuestos': return accionPresupuestos_(body);
+      default: return { ok: false, error: 'Acción desconocida: ' + body.accion };
     }
   } catch (err) {
-    return json_({ ok: false, error: String(err && err.message || err) });
+    return { ok: false, error: String(err && err.message || err) };
   } finally {
-    lock.releaseLock();
+    try { lock.releaseLock(); } catch (err) { }
   }
 }
 

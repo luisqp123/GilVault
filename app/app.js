@@ -59,19 +59,50 @@
   const enDemo = () => !config().url;
   const claveCache = mes => 'gv_cache_' + (enDemo() ? 'demo_' : '') + mes;
 
+  // Dos vías para hablar con Apps Script: POST (fetch) y, si el navegador la bloquea,
+  // JSONP (una etiqueta <script> con GET), que no depende de CORS.
   async function api(accion, datos) {
     if (enDemo()) return Demo.llamar(accion, datos);
     const { url, token } = config();
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(Object.assign({ token, accion }, datos || {})),
-      redirect: 'follow'
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const j = await res.json();
-    if (!j.ok) throw new Error(j.error || 'Error');
+    const body = Object.assign({ token, accion }, datos || {});
+    let j;
+    if (ls.get('gv_via', 'post') === 'jsonp') {
+      j = await jsonp(url, body);
+    } else {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(body),
+          redirect: 'follow'
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        j = await res.json();
+      } catch (ePost) {
+        try {
+          j = await jsonp(url, body);
+          ls.set('gv_via', 'jsonp'); // esta vía funciona: usarla desde ahora
+        } catch (eJsonp) {
+          throw new Error(`No pude conectar con tu script de Google (POST: ${ePost.message} · respaldo: ${eJsonp.message})`);
+        }
+      }
+    }
+    if (!j || !j.ok) throw new Error((j && j.error) || 'Respuesta vacía del script');
     return j;
+  }
+
+  let nJsonp = 0;
+  function jsonp(url, body) {
+    return new Promise((resolve, reject) => {
+      const cb = 'gv_cb_' + Date.now() + '_' + (nJsonp++);
+      const s = document.createElement('script');
+      const fin = () => { clearTimeout(t); delete window[cb]; s.remove(); };
+      const t = setTimeout(() => { fin(); reject(new Error('tiempo de espera agotado')); }, 25000);
+      window[cb] = r => { fin(); resolve(r); };
+      s.onerror = () => { fin(); reject(new Error('el script no respondió (¿falta actualizar el código o un bloqueador lo impide?)')); };
+      s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb + '&payload=' + encodeURIComponent(JSON.stringify(body));
+      document.head.appendChild(s);
+    });
   }
 
   // ---------------------------------------------------------------- estado
@@ -88,12 +119,12 @@
     if (!silencioso && !st.datos) render();
     try {
       const d = await api('datos', { mes: st.mes });
-      st.datos = d; st.offline = false;
+      st.datos = d; st.offline = false; st.error = null;
       ls.set(claveCache(st.mes), d);
     } catch (e) {
       const c = ls.get(claveCache(st.mes), null);
-      st.datos = c; st.offline = true;
-      if (!c) toast('Sin conexión: ' + e.message, true);
+      st.datos = c; st.offline = true; st.error = e.message;
+      if (c) toast('Sin conexión: ' + e.message, true);
     }
     render();
     avisarReporteNuevo();
@@ -111,6 +142,22 @@
   // ---------------------------------------------------------------- render
   function render() {
     const { vista, arg } = ruta();
+    if (!st.datos && vista === 'config') {
+      // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v1</div>`;
+      return;
+    }
+    if (!st.datos && st.error) {
+      $app.innerHTML = `<div class="win" style="margin-top:12vh">
+        <div style="width:72px;margin:0 auto 8px">${sp('cofre', 'xl')}</div>
+        <p class="px rojo" style="text-align:center">¡El cofre no se abre!</p>
+        <p style="overflow-wrap:anywhere">${esc(st.error)}</p>
+        <p class="dim" style="font-size:18px">Revisa en Config que la URL termine en /exec y que el token sea el del correo. Si acabas de actualizar el script, crea una <b>nueva versión</b> de la implementación.</p>
+        <div class="botones"><button class="btn oro" data-accion="reintentar">Reintentar</button><button class="btn" data-ir="config">Config</button></div>
+        <div class="botones"><button class="btn" data-accion="desconectar">Usar modo demo</button></div>
+      </div>`;
+      return;
+    }
     if (!st.datos) {
       $app.innerHTML = `<div class="win" style="margin-top:40vh;text-align:center"><span class="px cargando">Abriendo el cofre</span></div>`;
       return;
@@ -318,7 +365,7 @@
 
   // ----- Config
   function vConfig() {
-    const c = config(), pres = st.datos.presupuestos || {};
+    const c = config(), pres = (st.datos && st.datos.presupuestos) || {};
     return cabecera('Config') + `
       <form class="win" id="f-conexion">
         <h2 class="titulo">Conexión</h2>
@@ -460,6 +507,7 @@
     if (el.dataset.accion === 'desconectar') {
       ls.set('gv_url', ''); toast('Modo demo activado.'); st.datos = null; cargarDatos(); return;
     }
+    if (el.dataset.accion === 'reintentar') { st.error = null; render(); cargarDatos(); return; }
     if (el.dataset.accion === 'reiniciar-demo') { Demo.reiniciar(); st.datos = null; cargarDatos(); toast('Datos demo reiniciados.'); }
   });
 
@@ -481,7 +529,7 @@
     } else if (f.id === 'f-conexion') {
       const url = f.url.value.trim(), token = f.token.value.trim();
       if (url && !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) return toast('La URL debe terminar en /exec', true);
-      ls.set('gv_url', url); ls.set('gv_token', token);
+      ls.set('gv_url', url); ls.set('gv_token', token); ls.set('gv_via', 'post');
       if (!url) { st.datos = null; return cargarDatos(); }
       const r = await ejecutar(() => api('ping'), '¡Conectado al cofre!');
       if (r) { st.datos = null; cargarDatos(); }

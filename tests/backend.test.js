@@ -43,7 +43,7 @@ const ctx = {
     formatDate: (d, tz, f) => { const p = n => String(n).padStart(2, '0'); return f === 'yyyy-MM' ? `${d.getFullYear()}-${p(d.getMonth() + 1)}` : `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; }
   },
   Session: { getScriptTimeZone: () => 'Europe/Rome', getEffectiveUser: () => ({ getEmail: () => 'yo@example.com' }) },
-  ContentService: { MimeType: { JSON: 'json' }, createTextOutput: t => ({ setMimeType: () => ({ texto: t }) }) },
+  ContentService: { MimeType: { JSON: 'json', JAVASCRIPT: 'js' }, createTextOutput: t => ({ setMimeType: () => ({ texto: t }) }) },
   ScriptApp: { getProjectTriggers: () => [], deleteTrigger() { }, newTrigger: () => { const b = { timeBased: () => b, onMonthDay: () => b, atHour: () => b, create: () => b }; return b; } },
   MailApp: { sendEmail: (a, s, c) => correos.push({ a, s, c }) },
   UrlFetchApp: { fetch() { } },
@@ -107,5 +107,12 @@ assert.strictEqual(post({ token, accion: 'reporte', mes: '2026-11' }).visto, tru
 const antes = hojas.Movimientos.getLastRow();
 const pr = post({ token, accion: 'probar', titulo: 'x', texto: 'Pagamento di 3,00 EUR presso FARMACIA' });
 assert.ok(pr.resultado.esPago && hojas.Movimientos.getLastRow() === antes);
+
+// JSONP (vía de respaldo de la app).
+const js = ctx.doGet({ parameter: { callback: 'gv_cb1', payload: JSON.stringify({ token, accion: 'ping' }) } }).texto;
+assert.ok(/^gv_cb1\(\{"ok":true/.test(js), 'JSONP responde: ' + js);
+assert.ok(/Token incorrecto/.test(ctx.doGet({ parameter: { callback: 'x', payload: '{"token":"no"}' } }).texto));
+assert.ok(/callback inválido/.test(ctx.doGet({ parameter: { callback: 'alert(1)//' } }).texto));
+assert.strictEqual(JSON.parse(ctx.doGet({ parameter: {} }).texto).version, 2);
 
 console.log('Backend: todas las pruebas OK');
