@@ -14,7 +14,8 @@
     // rojo / verde / azul / morado
     r: '#e2393b', R: '#9c1d2b', v: '#5fd068', V: '#2f8a3c',
     c: '#7fe3ff', C: '#2a8fd6', p: '#c27bff', P: '#7a3cc2',
-    e: '#f2d6a2', E: '#c9a06a' // pergamino
+    e: '#f2d6a2', E: '#c9a06a', // pergamino / piel
+    t: '#1f9a8f', T: '#12655e' // túnica del sabio
   };
 
   const S = {
@@ -191,6 +192,258 @@
     ]
   };
 
+  // --- Generado por tools/sabio_grid.py (Sabio Ábaco y moneda giratoria) ---
+  Object.assign(S, {
+ "sabio_1": [
+  "......kppkkkkk............",
+  ".......kkppppPk...........",
+  ".........kpppPk.....kkk...",
+  ".........kypppPk...kCCCk..",
+  "........kppppppPk.kCccCCk.",
+  "........kppypppPk.kCcCCCk.",
+  ".......kppppppppPk.kCCCk..",
+  ".......kppppppyppPk.knk...",
+  ".....kkggggggggggggkknbk..",
+  "....kpppppppppppppppknbk..",
+  "...kPPPPPPPPPPPPPPPPPnbk..",
+  "....kkkkkkkkkkkkkkkkknbk..",
+  "........kwwwewwwEk..knbk..",
+  "........kekeeekEEk..knbk..",
+  ".......kweeeEeeEEsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  "........kwwwwwwwsk.kknbk..",
+  ".......ktwwwwwwwsTkeenbk..",
+  ".......ktwwwwwwwsTkeEnbk..",
+  ".......kttwwwwwsTTkkknbk..",
+  "......ktttwwwwwstTTkknbk..",
+  ".....kktggwwwwwsggTkknbk..",
+  "....keettttwwwsttTTkknbk..",
+  "....keettttwwwstttTTknbk..",
+  ".....ktttttwwwstttTTknbk..",
+  ".....kttttttttttttTTknbk..",
+  "....kttttttttttttttTTnbk..",
+  "....kttttttttttttttTTnbk..",
+  "....ktTTTTTTTTTTTTTTTnbk..",
+  ".....kknnnkkkkknnnkkknbk..",
+  ".......kkk.....kkk...kk..."
+ ],
+ "sabio_2": [
+  ".......kk.................",
+  "......kppkkkkk............",
+  ".......kkppppPk.....kkk...",
+  ".........kpppPk....kCCCk..",
+  ".........kypppPk..kCwcCCk.",
+  "........kppppppPk.kCccCCk.",
+  "........kppypppPk..kCCCk..",
+  ".......kppppppppPk..knk...",
+  ".......kppppppyppPk.knbk..",
+  ".....kkggggggggggggkknbk..",
+  "....kpppppppppppppppknbk..",
+  "...kPPPPPPPPPPPPPPPPPnbk..",
+  "....kkkkkkkkkkkkkkkkknbk..",
+  "........kwwwewwwEk..knbk..",
+  "........kekeeekEEk..knbk..",
+  ".......kweeeEeeEEsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  "........kwwwwwwwsk.kknbk..",
+  ".......ktwwwwwwwsTkeenbk..",
+  ".......ktwwwwwwwsTkeEnbk..",
+  "......ktttwwwwwstTTkknbk..",
+  "......ktttwwwwwstTTkknbk..",
+  ".....kktggwwwwwsggTkknbk..",
+  "....keettttwwwstttTTknbk..",
+  "....keettttwwwstttTTknbk..",
+  ".....ktttttwwwstttTTknbk..",
+  "....kttttttttttttttTTnbk..",
+  "....kttttttttttttttTTnbk..",
+  "....ktTTTTTTTTTTTTTTTnbk..",
+  ".....kknnnkkkkknnnkkknbk..",
+  ".......kkk.....kkk...kk..."
+ ],
+ "sabio_parpadeo": [
+  "......kppkkkkk............",
+  ".......kkppppPk...........",
+  ".........kpppPk.....kkk...",
+  ".........kypppPk...kCCCk..",
+  "........kppppppPk.kCccCCk.",
+  "........kppypppPk.kCcCCCk.",
+  ".......kppppppppPk.kCCCk..",
+  ".......kppppppyppPk.knk...",
+  ".....kkggggggggggggkknbk..",
+  "....kpppppppppppppppknbk..",
+  "...kPPPPPPPPPPPPPPPPPnbk..",
+  "....kkkkkkkkkkkkkkkkknbk..",
+  "........kwwwewwwEk..knbk..",
+  "........keEeeeEEEk..knbk..",
+  ".......kweeeEeeEEsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  "........kwwwwwwwsk.kknbk..",
+  ".......ktwwwwwwwsTkeenbk..",
+  ".......ktwwwwwwwsTkeEnbk..",
+  ".......kttwwwwwsTTkkknbk..",
+  "......ktttwwwwwstTTkknbk..",
+  ".....kktggwwwwwsggTkknbk..",
+  "....keettttwwwsttTTkknbk..",
+  "....keettttwwwstttTTknbk..",
+  ".....ktttttwwwstttTTknbk..",
+  ".....kttttttttttttTTknbk..",
+  "....kttttttttttttttTTnbk..",
+  "....kttttttttttttttTTnbk..",
+  "....ktTTTTTTTTTTTTTTTnbk..",
+  ".....kknnnkkkkknnnkkknbk..",
+  ".......kkk.....kkk...kk..."
+ ],
+ "sabio_habla_1": [
+  "......kppkkkkk............",
+  ".......kkppppPk...........",
+  ".........kpppPk.....kkk...",
+  ".........kypppPk...kCCCk..",
+  "........kppppppPk.kCccCCk.",
+  "........kppypppPk.kCcCCCk.",
+  ".......kppppppppPk.kCCCk..",
+  ".......kppppppyppPk.knk...",
+  ".....kkggggggggggggkknbk..",
+  "....kpppppppppppppppknbk..",
+  "...kPPPPPPPPPPPPPPPPPnbk..",
+  "....kkkkkkkkkkkkkkkkknbk..",
+  "........kwwwewwwEk..knbk..",
+  "........kekeeekEEk..knbk..",
+  ".......kweeeEeeEEsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  ".......kwwwRRRwwwsk.knbk..",
+  "........kwwwRwwwsk.kknbk..",
+  ".......ktwwwwwwwsTkeenbk..",
+  ".......ktwwwwwwwsTkeEnbk..",
+  ".......kttwwwwwsTTkkknbk..",
+  "......ktttwwwwwstTTkknbk..",
+  ".....kktggwwwwwsggTkknbk..",
+  "....keettttwwwsttTTkknbk..",
+  "....keettttwwwstttTTknbk..",
+  ".....ktttttwwwstttTTknbk..",
+  ".....kttttttttttttTTknbk..",
+  "....kttttttttttttttTTnbk..",
+  "....kttttttttttttttTTnbk..",
+  "....ktTTTTTTTTTTTTTTTnbk..",
+  ".....kknnnkkkkknnnkkknbk..",
+  ".......kkk.....kkk...kk..."
+ ],
+ "sabio_habla_2": [
+  ".......kk.................",
+  "......kppkkkkk............",
+  ".......kkppppPk.....kkk...",
+  ".........kpppPk....kCCCk..",
+  ".........kypppPk..kCwcCCk.",
+  "........kppppppPk.kCccCCk.",
+  "........kppypppPk..kCCCk..",
+  ".......kppppppppPk..knk...",
+  ".......kppppppyppPk.knbk..",
+  ".....kkggggggggggggkknbk..",
+  "....kpppppppppppppppknbk..",
+  "...kPPPPPPPPPPPPPPPPPnbk..",
+  "....kkkkkkkkkkkkkkkkknbk..",
+  "........kwwwewwwEk..knbk..",
+  "........kekeeekEEk..knbk..",
+  ".......kweeeEeeEEsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  ".......kwwwwwwwwwsk.knbk..",
+  "........kwwwwwwwsk.kknbk..",
+  ".......ktwwwwwwwsTkeenbk..",
+  ".......ktwwwwwwwsTkeEnbk..",
+  "......ktttwwwwwstTTkknbk..",
+  "......ktttwwwwwstTTkknbk..",
+  ".....kktggwwwwwsggTkknbk..",
+  "....keettttwwwstttTTknbk..",
+  "....keettttwwwstttTTknbk..",
+  ".....ktttttwwwstttTTknbk..",
+  "....kttttttttttttttTTnbk..",
+  "....kttttttttttttttTTnbk..",
+  "....ktTTTTTTTTTTTTTTTnbk..",
+  ".....kknnnkkkkknnnkkknbk..",
+  ".......kkk.....kkk...kk..."
+ ],
+ "gil_1": [
+  "....kkkk....",
+  "..kkggookk..",
+  ".kygggooook.",
+  ".kyggOOoook.",
+  "kyygOgoooook",
+  "kyygOgoooook",
+  "kyygOgOOoook",
+  "kyyggOOooook",
+  ".kygggooook.",
+  ".kygggooook.",
+  "..kkggookk..",
+  "....kkkk...."
+ ],
+ "gil_2": [
+  ".....kk.....",
+  "....kgok....",
+  "...kggook...",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "...kggook...",
+  "....kgok....",
+  ".....kk....."
+ ],
+ "gil_3": [
+  "............",
+  ".....kk.....",
+  "....kgok....",
+  "....kgok....",
+  "....kgok....",
+  "....kgok....",
+  "....kgok....",
+  "....kgok....",
+  "....kgok....",
+  "....kgok....",
+  ".....kk.....",
+  "............"
+ ],
+ "gil_4": [
+  ".....kk.....",
+  "....kgok....",
+  "...kggook...",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "..kyggoook..",
+  "...kggook...",
+  "....kgok....",
+  ".....kk....."
+ ]
+});
+  // --- fin generado ---
+
+  // --- Cuadros derivados para animaciones ---
+  const CATS = ['Comida', 'Salud', 'Transporte', 'Tiempo libre', 'Hogar/Servicios', 'Suscripciones', 'Otros'];
+  const subir = g => g.slice(1).concat([g[0].replace(/./g, '.')]);
+  CATS.forEach(n => { S[n + '_arriba'] = subir(S[n]); });
+  // Cofre con los destellos en otro sitio.
+  S.cofre_2 = (() => {
+    const g = S.cofre.map((f, y) => f.split('').map((c, x) => (c === 'w' && (x < 4 || x > 27)) ? '.' : c));
+    [[28, 3], [3, 9]].forEach(([cx, cy]) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => {
+      const x = cx + dx, y = cy + dy;
+      if (g[y] && g[y][x] === '.') g[y][x] = 'w';
+    }));
+    return g.map(f => f.join(''));
+  })();
+
+  // Animaciones: cuadros y milisegundos por cuadro (ritmo 8-bit, pocas imágenes por segundo).
+  const ANIM = {
+    gil: { f: ['gil_1', 'gil_2', 'gil_3', 'gil_4'], ms: 170 },
+    cofre: { f: ['cofre', 'cofre_2'], ms: 600 }
+  };
+  CATS.forEach(n => { ANIM[n] = { f: [n, n + '_arriba'], ms: 260 }; });
+
   function svg(nombre, px) {
     const g = S[nombre] || S.Otros;
     const h = g.length, w = g[0].length;
@@ -210,6 +463,21 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"${size} shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
   }
 
-  root.Sprites = { svg, grids: S, PAL };
+  // SVG píxel a píxel con retardos aleatorios: el sprite "se materializa" (efecto disolver).
+  function svgPixeles(nombre, duracion) {
+    const g = S[nombre]; const h = g.length, w = g[0].length;
+    let rects = '', semilla = 11;
+    const rnd = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const ch = g[y][x];
+      if (ch === '.' || !PAL[ch]) continue;
+      // Aparecen de abajo hacia arriba con dispersión, como partículas que se juntan.
+      const d = Math.round(((h - y) / h) * duracion * 0.6 + rnd() * duracion * 0.4);
+      rects += `<rect class="pxa" style="animation-delay:${d}ms" x="${x}" y="${y}" width="1" height="1" fill="${PAL[ch]}"/>`;
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+  }
+
+  root.Sprites = { svg, svgPixeles, grids: S, PAL, ANIM };
   if (typeof module !== 'undefined') module.exports = root.Sprites;
 })(typeof window !== 'undefined' ? window : globalThis);

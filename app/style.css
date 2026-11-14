@@ -228,3 +228,55 @@ textarea { min-height: 80px; resize: vertical; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Animaciones 8-bit ---------- */
+.sprite.mini { width: 18px; height: 18px; }
+.hp.mp .barra > i { background: #5aa8ff; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .3); }
+
+/* ---------- El Sabio Ábaco ---------- */
+.sabio { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; align-items: end; }
+.sabio-fig { position: relative; width: 92px; height: 112px; }
+.sabio-sprite { width: 92px; height: 112px; }
+.sabio-sprite svg { width: 100%; height: 100%; }
+/* Materializarse píxel a píxel */
+.pxa { opacity: 0; animation: pxa .25s steps(2) forwards; }
+@keyframes pxa { from { opacity: 0; } to { opacity: 1; } }
+/* Chispas mágicas que suben desde el orbe */
+.particulas { position: absolute; left: 66px; top: 6px; width: 26px; height: 100px; pointer-events: none; }
+.particulas i {
+  position: absolute; bottom: 72px; width: 4px; height: 4px; background: #7fe3ff;
+  box-shadow: 0 0 0 1px #2a8fd6; opacity: 0;
+  animation: chispa 2.4s steps(6) infinite;
+}
+.particulas i:nth-child(2n) { background: #fff; width: 3px; height: 3px; }
+.particulas i:nth-child(1) { left: 2px;  animation-delay: 0s; }
+.particulas i:nth-child(2) { left: 14px; animation-delay: .3s; }
+.particulas i:nth-child(3) { left: 8px;  animation-delay: .6s; }
+.particulas i:nth-child(4) { left: 20px; animation-delay: .9s; }
+.particulas i:nth-child(5) { left: 4px;  animation-delay: 1.2s; }
+.particulas i:nth-child(6) { left: 16px; animation-delay: 1.5s; }
+.particulas i:nth-child(7) { left: 10px; animation-delay: 1.8s; }
+.particulas i:nth-child(8) { left: 0;    animation-delay: 2.1s; }
+.particulas i:nth-child(9) { left: 22px; animation-delay: 1s; }
+@keyframes chispa {
+  0% { opacity: 0; transform: translate(0, 0); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-6px, -60px); }
+}
+.dialogo {
+  position: relative; display: block; width: 100%; min-height: 104px; text-align: left; cursor: pointer;
+  font: inherit; font-size: 21px; line-height: 1.2; color: var(--txt); text-shadow: 2px 2px 0 #000;
+  background: rgba(0, 0, 20, .55); border: 2px solid var(--borde); border-radius: 6px;
+  padding: 8px 10px 20px; overflow-wrap: anywhere;
+}
+.dialogo::before { /* pico del globo hacia el sabio */
+  content: ''; position: absolute; left: -10px; bottom: 18px;
+  border: 8px solid transparent; border-right-color: var(--borde); border-left: 0;
+}
+.dialogo .nombre { display: block; font-size: 9px; margin-bottom: 4px; }
+.dialogo .sigue { position: absolute; right: 8px; bottom: 2px; color: var(--oro); visibility: hidden; animation: parpadeo .8s steps(2) infinite; }
+@media (max-width: 360px) {
+  .sabio { grid-template-columns: 70px minmax(0, 1fr); }
+  .sabio-fig, .sabio-sprite { width: 70px; height: 86px; }
+  .particulas { left: 50px; transform: scale(.76); transform-origin: top left; }
+}

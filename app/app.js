@@ -25,7 +25,9 @@
     return (neg ? '-' : '') + ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + dec + ' €';
   }
   const fechaCorta = iso => { const d = new Date(iso); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
-  const sp = (nombre, clase) => `<span class="sprite ${clase || ''}">${Sprites.svg(nombre)}</span>`;
+  // anim: 'siempre' (se mueve todo el tiempo) o 'sel' (solo cuando su fila está seleccionada).
+  const sp = (nombre, clase, anim) => `<span class="sprite ${clase || ''}"${anim && Sprites.ANIM[nombre] ? ` data-anim="${esc(nombre)}" data-modo="${anim}"` : ''}>${Sprites.svg(nombre)}</span>`;
+  const menosMovimiento = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const aLocalInput = iso => { const d = new Date(iso); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 
   // Cursor de manita como variable CSS.
@@ -51,7 +53,8 @@
     cursor: () => tono([1046], 0.04),
     ok: () => tono([784, 1175], 0.07),
     error: () => tono([196, 147], 0.12, 'sawtooth'),
-    tesoro: () => tono([523, 659, 784, 1046, 784, 1046], 0.09)
+    tesoro: () => tono([523, 659, 784, 1046, 784, 1046], 0.09),
+    voz: () => tono([660 + Math.round(Math.random() * 180)], 0.025, 'triangle')
   };
 
   // ---------------------------------------------------------------- API
@@ -144,7 +147,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v3</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v4</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -163,7 +166,8 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v3</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v4</div>`;
+    montarSabio();
   }
 
   function avisos() {
@@ -186,6 +190,14 @@
     const pct = limite ? Math.max(0, Math.min(100, resto / limite * 100)) : 0;
     const clase = pct <= 15 ? 'bajo' : pct <= 40 ? 'medio' : '';
     return `<div class="hp ${clase}"><div class="lbl"><span class="dim">HP</span><span class="num">${gastado > limite ? '<span class="rojo">¡K.O.!</span> ' : ''}${euros(resto)} / ${euros(limite)}</span></div>
+      <div class="barra"><i style="width:${pct}%"></i></div></div>`;
+  }
+
+  // MP = maná: presupuesto total del mes que te queda.
+  function barraMP(gastado, limite) {
+    const resto = limite - gastado;
+    const pct = limite ? Math.max(0, Math.min(100, resto / limite * 100)) : 0;
+    return `<div class="hp mp"><div class="lbl"><span class="dim fila" style="gap:4px">${sp('gil', 'mini', 'siempre')}MP</span><span class="num">${resto < 0 ? '<span class="rojo">¡Sin maná!</span> ' : ''}${euros(Math.max(0, resto))} / ${euros(limite)}</span></div>
       <div class="barra"><i style="width:${pct}%"></i></div></div>`;
   }
 
@@ -213,14 +225,14 @@
           <button class="btn mini" data-mes="1" aria-label="Mes siguiente" ${st.mes >= mesHoy() ? 'disabled style="opacity:.3"' : ''}>▶</button>
         </div>
         <div class="estado">
-          ${sp('cofre', 'g')}
+          ${sp('cofre', 'g', 'siempre')}
           <div>
             <div class="stat"><span class="k">Gastado</span><span class="num oro">${euros(r.total)}</span></div>
             <div class="stat"><span class="k">Objetos</span><span class="num">${r.cantidad}</span></div>
             <div class="stat"><span class="k">Media/día</span><span class="num">${euros(r.promedioDiario)}</span></div>
           </div>
         </div>
-        ${limites ? barraHP(r.total, limites) : ''}
+        ${limites ? barraMP(r.total, limites) : ''}
       </section>
       <nav class="win" aria-label="Menú">
         <ul class="menu">
@@ -262,7 +274,7 @@
       <div class="win">
         <div class="filtros">
           <button class="chip ${!st.filtro ? 'on' : ''}" data-filtro="">Todo</button>
-          ${CATS.map(c => `<button class="chip ${st.filtro === c ? 'on' : ''}" data-filtro="${esc(c)}">${sp(c)}${esc(c.split('/')[0])}</button>`).join('')}
+          ${CATS.map(c => `<button class="chip ${st.filtro === c ? 'on' : ''}" data-filtro="${esc(c)}">${sp(c, '', 'sel')}${esc(c.split('/')[0])}</button>`).join('')}
         </div>
         <div class="stat" style="margin:8px 6px 0"><span class="k">${movs.length} objetos</span><span class="num oro">${euros(total)}</span></div>
         ${html || '<div class="vacio">Inventario vacío.</div>'}
@@ -274,7 +286,7 @@
     const r = st.datos.resumen, pres = st.datos.presupuestos || {};
     return cabecera('Categorías', true) + `<div class="win"><ul class="menu">
       ${r.categorias.map(c => `<li><button class="item" data-cat="${esc(c.categoria)}" style="flex-wrap:wrap">
-        ${sp(c.categoria)}
+        ${sp(c.categoria, '', 'sel')}
         <span class="grow">${esc(c.categoria)}<span class="sub">${c.cantidad} objeto${c.cantidad === 1 ? '' : 's'} · ${c.porcentaje}%</span></span>
         <span class="monto num oro">${euros(c.total)}</span>
         ${pres[c.categoria] ? `<span style="flex-basis:100%">${barraHP(c.total, pres[c.categoria])}</span>` : ''}
@@ -321,11 +333,22 @@
     d.excedidos.forEach(c => eventos.push(`<span class="rojo">¡${esc(c)} quedó K.O.!</span> Superó su presupuesto.`));
     d.recurrentes.forEach(x => eventos.push(`Posible suscripción: <span class="oro">${esc(x.lugar)}</span> aprox. ${euros(x.montoAprox)}/mes`));
     d.posiblesDuplicados.forEach(x => eventos.push(`¿Cobro duplicado? ${esc(x.lugar)} ${euros(x.monto)} el ${esc(x.dia.slice(8))}/${esc(x.dia.slice(5, 7))}`));
+    st.sabio = { mensajes: mensajesSabio(mes, d, r.cerrado), i: 0 };
     return cabecera('Reporte') + `
+      <section class="win sabio" id="sabio" aria-label="El Sabio Ábaco">
+        <div class="sabio-fig">
+          <span class="sprite sabio-sprite" id="sabio-sprite"></span>
+          <div class="particulas" aria-hidden="true">${'<i></i>'.repeat(9)}</div>
+        </div>
+        <button class="dialogo" id="sabio-dialogo" type="button" aria-live="polite">
+          <span class="px oro nombre">Sabio Ábaco</span>
+          <span id="sabio-texto"></span><span class="sigue" id="sabio-sigue">▼</span>
+        </button>
+      </section>
       <section class="win" style="text-align:center">
         <div class="banner">${r.cerrado ? '¡VICTORIA!' : 'BATALLA EN CURSO'}</div>
         <div class="px dim">Resumen de ${esc(nombreMes(mes))}</div>
-        <div class="${r.cerrado ? 'cofre-anim' : ''}" style="margin:10px auto 4px;width:96px">${sp('cofre', 'xl')}</div>
+        <div class="${r.cerrado ? 'cofre-anim' : ''}" style="margin:10px auto 4px;width:96px">${sp('cofre', 'xl', 'siempre')}</div>
         <div class="stat"><span class="k">Giles gastados</span><span class="num oro">${euros(d.total)}</span></div>
         <div class="stat"><span class="k">Variación</span><span class="num">${varTxt}</span></div>
         <div class="stat"><span class="k">Media diaria</span><span class="num">${euros(d.promedioDiario)}</span></div>
@@ -395,6 +418,107 @@
       </section>`;
   }
 
+  // ---------------------------------------------------------------- animaciones 8-bit
+  const cacheSvg = {};
+  const svgDe = n => cacheSvg[n] || (cacheSvg[n] = Sprites.svg(n));
+  setInterval(() => {
+    if (document.hidden || menosMovimiento()) return;
+    const ahora = Date.now();
+    document.querySelectorAll('[data-anim]').forEach(el => {
+      const a = Sprites.ANIM[el.dataset.anim];
+      if (!a) return;
+      let n = a.f[0];
+      if (el.dataset.modo === 'siempre' || el.closest('.sel, .on, :hover')) n = a.f[Math.floor(ahora / a.ms) % a.f.length];
+      if (el.dataset.f !== n) { el.dataset.f = n; el.innerHTML = svgDe(n); }
+    });
+  }, 80);
+
+  // ---------------------------------------------------------------- el Sabio Ábaco
+  function mensajesSabio(mes, d, cerrado) {
+    const m = [];
+    const cats = d.categorias.filter(c => c.total > 0).sort((a, b) => b.total - a.total);
+    const nombre = nombreMes(mes);
+    if (!d.cantidad) {
+      return [cerrado ? `En ${nombre} tu cofre no registró gastos. Un mes tranquilo… o un misterio.`
+        : 'Aún no veo gastos este mes, joven aventurero. Cuando pagues con tu tarjeta, aquí aparecerá tu botín.'];
+    }
+    m.push(cerrado ? `¡Ah, aventurero! He estudiado el pergamino de ${nombre}. Escucha bien…`
+      : '¡Ah, aventurero! He consultado el orbe sobre tu mes en curso…');
+    const top = cats[0];
+    if (top) {
+      const lug = d.topLugares.find(l => l.categoria === top.categoria);
+      m.push(`Tu oro fluye sobre todo hacia ${top.categoria}: ${euros(top.total)}, el ${top.porcentaje}% de lo gastado` +
+        (lug ? `. Allí ${lug.lugar} se lleva ${euros(lug.total)}.` : '.'));
+    }
+    if (d.topLugares[0] && (!top || d.topLugares[0].categoria !== top.categoria)) {
+      const l = d.topLugares[0];
+      m.push(`El lugar que más giles te cobra es ${l.lugar}: ${euros(l.total)} en ${l.cantidad} visita${l.cantidad === 1 ? '' : 's'}.`);
+    }
+    const mana = d.categorias.reduce((s, c) => s + (c.presupuesto || 0), 0);
+    if (mana > 0) {
+      const resto = mana - d.total;
+      if (!cerrado) {
+        const [a, mm] = mes.split('-').map(Number);
+        const dias = Math.max(1, new Date(a, mm, 0).getDate() - new Date().getDate() + 1);
+        m.push(resto >= 0
+          ? `Te quedan ${euros(resto)} de maná para ${dias} día${dias === 1 ? '' : 's'}: unos ${euros(resto / dias)} por día. Úsalo con sabiduría.`
+          : `¡Tu maná se agotó! Te pasaste ${euros(-resto)} del presupuesto del mes. Toca descansar el hechizo de la tarjeta.`);
+      } else {
+        m.push(resto >= 0 ? `Terminaste el mes con ${euros(resto)} de maná sin usar. ¡Digno de un archimago!`
+          : `Este mes gastaste ${euros(-resto)} más del maná que tenías. El próximo, más prudencia.`);
+      }
+    } else {
+      m.push('Aún no has sellado tu reserva de maná. Ve a CONFIG y fija tus presupuestos: así podré decirte cuánto te queda.');
+    }
+    if (d.excedidos.length) m.push(`Cuidado: ${d.excedidos.join(', ')} ${d.excedidos.length === 1 ? 'quedó' : 'quedaron'} K.O., sin HP.`);
+    if (d.variacion !== null) {
+      m.push(d.variacion > 0 ? `Gastas un ${Math.abs(d.variacion)}% más que el mes anterior. Vigila tu bolsa.`
+        : `Gastas un ${Math.abs(d.variacion)}% menos que el mes anterior. ¡Tu disciplina crece!`);
+    }
+    if (d.recurrentes.length) m.push(`Siento cobros que vuelven cada mes: ${d.recurrentes.map(x => x.lugar).slice(0, 3).join(', ')}. ¿Aún los usas todos?`);
+    m.push('Toca para escucharme de nuevo. Que tus giles se multipliquen.');
+    return m;
+  }
+
+  let sabioT = null;
+  function montarSabio() {
+    clearInterval(sabioT); sabioT = null;
+    const el = document.getElementById('sabio-sprite');
+    if (!el || !st.sabio) return;
+    const $txt = document.getElementById('sabio-texto'), $sigue = document.getElementById('sabio-sigue');
+    const quieto = menosMovimiento();
+    let modo = 'aparece', letra = 0, tic = 0, parp = 0;
+    el.innerHTML = quieto ? Sprites.svg('sabio_1') : Sprites.svgPixeles('sabio_1', 900);
+    const decir = () => { letra = 0; modo = 'habla'; $sigue.style.visibility = 'hidden'; };
+    const mostrar = n => { if (el.dataset.f !== n) { el.dataset.f = n; el.innerHTML = svgDe(n); } };
+    setTimeout(() => { if (modo === 'aparece') decir(); }, quieto ? 0 : 1000);
+    sabioT = setInterval(() => {
+      if (!document.body.contains(el)) { clearInterval(sabioT); return; }
+      tic++;
+      const msg = st.sabio.mensajes[st.sabio.i] || '';
+      if (modo === 'habla') {
+        letra = Math.min(msg.length, letra + 1);
+        $txt.textContent = msg.slice(0, letra);
+        if (letra % 2 === 0 && msg[letra - 1] !== ' ') sfx.voz();
+        if (!quieto) mostrar(tic % 4 < 2 ? 'sabio_habla_1' : 'sabio_habla_2');
+        if (letra >= msg.length) { modo = 'espera'; $sigue.style.visibility = 'visible'; }
+      } else if (modo === 'espera' && !quieto) {
+        // Respiración lenta y parpadeo de vez en cuando.
+        if (tic % 70 === 0) parp = 3;
+        if (parp > 0) { parp--; mostrar('sabio_parpadeo'); }
+        else mostrar(Math.floor(tic / 12) % 2 ? 'sabio_2' : 'sabio_1');
+      }
+    }, 40);
+    document.getElementById('sabio-dialogo').onclick = () => {
+      const msg = st.sabio.mensajes[st.sabio.i] || '';
+      if (modo === 'habla') { letra = msg.length; return; }        // completar la frase
+      if (modo !== 'espera') return;
+      sfx.cursor();
+      st.sabio.i = (st.sabio.i + 1) % st.sabio.mensajes.length;  // siguiente (y vuelve a empezar)
+      decir();
+    };
+  }
+
   // ---------------------------------------------------------------- modal de detalle
   function abrirDetalle(id) {
     const m = st.datos.movimientos.find(x => x.id === id);
@@ -409,7 +533,7 @@
           <label class="campo grow"><span>Fecha</span><input name="fecha" type="datetime-local" value="${aLocalInput(m.fecha)}"></label>
         </div>
         <label class="campo"><span>Categoría</span></label>
-        <ul class="menu cats">${CATS.map(c => `<li><button type="button" class="item ${c === cat ? 'sel' : ''}" data-elegir="${esc(c)}">${sp(c)}<span class="trunc">${esc(c)}</span></button></li>`).join('')}</ul>
+        <ul class="menu cats">${CATS.map(c => `<li><button type="button" class="item ${c === cat ? 'sel' : ''}" data-elegir="${esc(c)}">${sp(c, '', 'sel')}<span class="trunc">${esc(c)}</span></button></li>`).join('')}</ul>
         <label class="check"><input type="checkbox" name="recordar" checked> Recordar categoría para este lugar</label>
         <div class="botones">
           <button class="btn oro" type="submit">Guardar</button>
