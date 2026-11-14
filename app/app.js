@@ -147,7 +147,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v4</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v5</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -166,7 +166,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v4</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v5</div>`;
     montarSabio();
   }
 
@@ -443,7 +443,7 @@
         : 'Aún no veo gastos este mes, joven aventurero. Cuando pagues con tu tarjeta, aquí aparecerá tu botín.'];
     }
     m.push(cerrado ? `¡Ah, aventurero! He estudiado el pergamino de ${nombre}. Escucha bien…`
-      : '¡Ah, aventurero! He consultado el orbe sobre tu mes en curso…');
+      : '¡Ah, aventurero! He repasado mi pergamino de cuentas de este mes…');
     const top = cats[0];
     if (top) {
       const lug = d.topLugares.find(l => l.categoria === top.categoria);
