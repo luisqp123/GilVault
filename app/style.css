@@ -421,3 +421,42 @@ textarea { min-height: 80px; resize: vertical; }
   .menu-gato .tienda { width: 140px; }
   .gato-dialogo::after { right: 60px; }
 }
+
+/* ---------- El aventurero ---------- */
+.heroe .nombre-heroe { background: none; border: 0; padding: 0; text-align: left; font-size: 11px; cursor: pointer; text-shadow: 2px 2px 0 #000; }
+.heroe-grid { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 12px; align-items: center; margin-top: 8px; }
+.heroe-fig { position: relative; width: 104px; height: 146px; }
+.heroe-sprite { width: 104px; height: 146px; }
+.heroe-sprite svg { width: 100%; height: 100%; }
+.estado-txt { font-size: 10px; color: var(--oro); }
+.estado-agotado .heroe-sprite { filter: saturate(.55) brightness(.85); }
+.estado-cansado .heroe-sprite { filter: saturate(.8); }
+.atributo { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 6px; align-items: center; margin-top: 4px; font-size: 19px; }
+.atributo .px { font-size: 8px; color: var(--dim); }
+.atributo .num { min-width: 34px; text-align: right; }
+.atributo small { font-size: 15px; }
+.barra-mini { height: 8px; background: #000; border: 2px solid #000; box-shadow: 0 0 0 1px var(--dim); }
+.barra-mini > i { display: block; height: 100%; background: var(--oro); }
+/* Brillo de energía alrededor del personaje */
+.aura { position: absolute; inset: 0; pointer-events: none; }
+.aura i { position: absolute; width: 4px; height: 4px; background: #fff4a3; box-shadow: 0 0 0 1px #e0921a; opacity: 0; animation: chispa 2s steps(5) infinite; }
+.aura i:nth-child(1) { left: 10%; bottom: 20%; }
+.aura i:nth-child(2) { left: 80%; bottom: 35%; animation-delay: .35s; }
+.aura i:nth-child(3) { left: 30%; bottom: 55%; animation-delay: .7s; }
+.aura i:nth-child(4) { left: 70%; bottom: 70%; animation-delay: 1.05s; }
+.aura i:nth-child(5) { left: 15%; bottom: 80%; animation-delay: 1.4s; }
+.aura i:nth-child(6) { left: 55%; bottom: 10%; animation-delay: 1.75s; }
+
+/* Mochila */
+.ranuras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ranura { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 8px 4px;
+  background: rgba(0, 0, 0, .3); border: 2px solid rgba(255, 255, 255, .25); border-radius: 6px; }
+.ranura .sprite { width: 32px; height: 32px; }
+.objeto { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px dashed rgba(255, 255, 255, .2); }
+.objeto:first-child { border-top: 0; }
+.icono-obj { width: 34px; height: 34px; padding: 3px; border: 2px solid; border-radius: 6px; background: rgba(0, 0, 0, .35); flex: none; }
+.icono-obj.grande { width: 64px; height: 64px; padding: 6px; }
+@media (max-width: 360px) {
+  .heroe-grid { grid-template-columns: 84px minmax(0, 1fr); }
+  .heroe-fig, .heroe-sprite { width: 84px; height: 118px; }
+}

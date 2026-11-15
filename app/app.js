@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v12</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v13</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -222,10 +222,11 @@
       $app.innerHTML = `<div class="win" style="margin-top:40vh;text-align:center"><span class="px cargando">Abriendo el cofre</span></div>`;
       return;
     }
-    const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v12</div>`;
+    const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig, mochila: vMochila };
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v13</div>`;
     montarSabio();
     montarGato();
+    montarAventura();
   }
 
   function avisos() {
@@ -374,13 +375,115 @@
     const reps = {};
     (st.datos.reportes || []).forEach(r => reps[r.mes] = r);
     const meses = [...new Set([mesHoy()].concat(st.datos.meses || [], Object.keys(reps)))].sort().reverse();
-    return cabecera('Reportes') + `<div class="win"><ul class="menu">
+    return cabecera('Reportes') + vEstadoHeroe() + `<div class="win"><ul class="menu">
       ${meses.map(m => `<li><button class="item" data-ir="reporte/${m}">
         ${sp(reps[m] ? 'Suscripciones' : 'gil')}
         <span class="grow">${esc(nombreMes(m))}<span class="sub">${m === mesHoy() ? 'En curso' : reps[m] ? 'Cerrado' : 'Calculado al vuelo'}</span></span>
         ${reps[m] && !reps[m].visto ? '<span class="badge" title="Nuevo" aria-label="nuevo">!</span>' : ''}
       </button></li>`).join('')}
     </ul></div>`;
+  }
+
+  // ----- El aventurero: estado, atributos y mochila
+  const invDefecto = () => ({ objetos: [], equipo: {}, botines: [], nombre: 'Viajero' });
+  const inventario = () => Object.assign(invDefecto(), ls.get('gv_aventura', {}));
+  const guardarInv = inv => ls.set('gv_aventura', inv);
+
+  function estadoActual() {
+    // El estado siempre se calcula con el mes en curso.
+    const d = st.mes === mesHoy() ? st.datos : (ls.get(claveCache(mesHoy()), null) || st.datos);
+    return Aventura.calcularEstado(d, new Date());
+  }
+
+  function filaAtributo(k, total, bonus) {
+    const b = bonus ? `<small class="${bonus > 0 ? 'verde' : 'rojo'}"> ${bonus > 0 ? '+' : ''}${bonus}</small>` : '';
+    return `<div class="atributo" title="${esc(Aventura.AYUDA[k])}"><span class="px">${k}</span>
+      <span class="barra-mini"><i style="width:${total}%"></i></span><span class="num">${total}${b}</span></div>`;
+  }
+
+  function vEstadoHeroe() {
+    const e = estadoActual(), inv = inventario();
+    const { total, bonus } = Aventura.aplicarEquipo(e.base, inv);
+    const [titulo, desc] = Aventura.TEXTO_ESTADO[e.estado];
+    const clase = e.energia >= 50 ? '' : e.energia >= 25 ? 'medio' : 'bajo';
+    return `<section class="win heroe estado-${e.estado}">
+      <div class="fila"><button class="px oro nombre-heroe grow" data-accion="renombrar" title="Cambiar nombre">${esc(inv.nombre)} ✎</button>
+        <span class="px">LV ${e.nivel}</span></div>
+      <div class="heroe-grid">
+        <div class="heroe-fig">
+          <span class="sprite heroe-sprite" data-anim="heroe_${e.estado}" data-modo="siempre">${Sprites.svg('heroe_' + e.estado + '_1')}</span>
+          ${e.estado === 'energia' ? `<span class="aura" aria-hidden="true">${'<i></i>'.repeat(6)}</span>` : ''}
+        </div>
+        <div class="heroe-datos">
+          <div class="px estado-txt">${titulo}</div>
+          <p class="dim" style="font-size:17px;margin:2px 0 6px">${desc}</p>
+          <div class="hp ${clase}"><div class="lbl"><span class="dim">Energía</span><span class="num">${e.energia}/100</span></div>
+            <div class="barra"><i style="width:${e.energia}%"></i></div></div>
+          ${Aventura.ATRIBUTOS.map(k => filaAtributo(k, total[k], bonus[k])).join('')}
+        </div>
+      </div>
+      <div class="botones"><button class="btn" data-ir="mochila">Mochila (${inv.objetos.length})</button></div>
+    </section>`;
+  }
+
+  function modsTexto(o) {
+    return Object.entries(o.mods).map(([k, v]) => `<span class="${v > 0 ? 'verde' : 'rojo'}">${v > 0 ? '+' : ''}${v} ${k}</span>`).join(' ');
+  }
+
+  function filaObjeto(o, puesto) {
+    const r = Aventura.RAREZAS[o.rareza];
+    return `<li class="objeto">
+      <span class="sprite icono-obj" style="border-color:${r.color}">${Sprites.svg('equipo_' + o.ranura)}</span>
+      <span class="grow" style="min-width:0;overflow-wrap:anywhere">${esc(o.nombre)}${puesto ? ' <span class="px oro" style="font-size:7px">EQUIPADO</span>' : ''}
+        <span class="sub"><span style="color:${r.color}">${r.nombre}</span> · ${Aventura.RANURAS[o.ranura]} · ${modsTexto(o)}</span></span>
+      ${puesto ? `<button class="btn mini" data-quitar="${o.ranura}">Quitar</button>` : `<button class="btn mini oro" data-equipar="${esc(o.id)}">Equipar</button>`}
+    </li>`;
+  }
+
+  function vMochila() {
+    const inv = inventario();
+    const puestos = new Set(Object.values(inv.equipo));
+    const ranuras = Object.entries(Aventura.RANURAS).map(([k, n]) => {
+      const o = inv.objetos.find(x => x.id === inv.equipo[k]);
+      return `<div class="ranura">${sp('equipo_' + k)}<span class="px dim" style="font-size:7px">${n}</span>
+        <span style="font-size:17px;overflow-wrap:anywhere">${o ? esc(o.nombre) : '—'}</span></div>`;
+    }).join('');
+    const lista = inv.objetos.slice().reverse();
+    return cabecera('Mochila') + `
+      <section class="win"><h2 class="titulo">Equipo</h2><div class="ranuras">${ranuras}</div></section>
+      <section class="win"><h2 class="titulo">Objetos (${lista.length})</h2>
+        ${lista.length ? `<ul class="menu">${lista.map(o => filaObjeto(o, puestos.has(o.id))).join('')}</ul>`
+          : '<div class="vacio">Tu mochila está vacía. Cada mes encontrarás un objeto al entrar en Reporte.</div>'}
+        <p class="dim" style="font-size:17px;margin:10px 0 0">Un objeto por ranura. Los malditos suben un atributo… pero bajan otro.</p>
+      </section>`;
+  }
+
+  // Botín del mes: un objeto al entrar en Reporte, una vez por mes.
+  function montarAventura() {
+    const { vista, arg } = ruta();
+    if (vista !== 'reporte' || arg || !st.datos || !$modal.hidden) return;
+    const inv = inventario(), mes = mesHoy();
+    if (inv.botines.includes(mes)) return;
+    const o = Aventura.generarObjeto(mes, estadoActual().energia);
+    inv.objetos.push(o); inv.botines.push(mes); guardarInv(inv);
+    const r = Aventura.RAREZAS[o.rareza];
+    sfx.tesoro();
+    $modal.innerHTML = `<div class="win" style="text-align:center">
+      <div class="cofre-anim" style="width:96px;margin:6px auto">${sp('cofre', 'xl', 'siempre')}</div>
+      <p class="px" style="line-height:1.8">✦ ¡Botín de ${esc(MESES[new Date().getMonth()])}! ✦</p>
+      <div style="display:flex;justify-content:center;margin:8px 0"><span class="sprite icono-obj grande" style="border-color:${r.color}">${Sprites.svg('equipo_' + o.ranura)}</span></div>
+      <p class="oro" style="margin:4px 0">${esc(o.nombre)}</p>
+      <p style="margin:0"><span style="color:${r.color}">${r.nombre}</span> · ${Aventura.RANURAS[o.ranura]}</p>
+      <p style="margin:6px 0">${modsTexto(o)}</p>
+      <div class="botones"><button class="btn oro" data-accion="equipar-botin">Equipar</button><button class="btn" data-accion="guardar-botin">A la mochila</button></div>
+    </div>`;
+    $modal.hidden = false;
+    $modal.onclick = e => {
+      const a = e.target.closest('[data-accion]');
+      if (!a && e.target !== $modal) return;
+      if (a && a.dataset.accion === 'equipar-botin') { const i2 = inventario(); i2.equipo[o.ranura] = o.id; guardarInv(i2); sfx.ok(); }
+      cerrarModal(); render();
+    };
   }
 
   // ----- Reporte de un mes ("Resumen de batalla")
@@ -891,6 +994,17 @@
     if (el.dataset.paleta) {
       const c = PALETAS[el.dataset.paleta]; sfx.ok(); aplicarColores(c); ls.set('gv_colores', c);
       document.querySelectorAll('[data-esquina]').forEach(i => { i.value = c[Number(i.dataset.esquina)]; });
+      return;
+    }
+    if (el.dataset.equipar) {
+      const inv = inventario(), o = inv.objetos.find(x => x.id === el.dataset.equipar);
+      if (o) { inv.equipo[o.ranura] = o.id; guardarInv(inv); sfx.ok(); toast(`Equipaste: ${o.nombre}`); render(); }
+      return;
+    }
+    if (el.dataset.quitar) { const inv = inventario(); delete inv.equipo[el.dataset.quitar]; guardarInv(inv); sfx.cursor(); render(); return; }
+    if (el.dataset.accion === 'renombrar') {
+      const inv = inventario(); const n = prompt('¿Cómo se llama tu aventurero?', inv.nombre);
+      if (n && n.trim()) { inv.nombre = n.trim().slice(0, 20); guardarInv(inv); render(); }
       return;
     }
     if (el.dataset.accion === 'oir-sonido') { try { new Audio('sonidos/objeto.ogg').play(); } catch (err) { } return; }
