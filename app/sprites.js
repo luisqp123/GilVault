@@ -634,7 +634,7 @@
  ]
 });
   // --- fin gato ---
-  // --- Generado por tools/tienda_grid.py (tienda mágica, sol y luna) ---
+  // --- Generado por tools/tienda_grid.py (tienda mágica, sol, luna, pociones, ladrillo) ---
   Object.assign(S, {
  "tienda": [
   "ZZZVZzZVZZZzVAZZZzZZZZZzZZZZZzZZZZZzZZZZZzAZVZZzZVZZZVZZ",
@@ -717,6 +717,76 @@
   ".msm....",
   ".mmsmmm.",
   "...mm..."
+ ],
+ "pocion_1": [
+  "..knnk..",
+  "..keek..",
+  "..keek..",
+  "..kkkk..",
+  ".kwpppk.",
+  "kppppppk",
+  "kppppppk",
+  "kppppppk",
+  "kppppppk",
+  ".kppppk."
+ ],
+ "pocion_2": [
+  "..knnk..",
+  "..keek..",
+  ".kvvvvk.",
+  ".kvvvvk.",
+  ".kwvvvk.",
+  ".kvvvvk.",
+  ".kvvvvk.",
+  ".kvvvvk.",
+  ".kvvvvk.",
+  ".kvvvvk."
+ ],
+ "pocion_3": [
+  "........",
+  ".kkkkkk.",
+  "knnnnnnk",
+  "kCCCCCCk",
+  "kCwCCCCk",
+  "kCCCCCCk",
+  "kCCCCCCk",
+  "kCCCCCCk",
+  "kCCCCCCk",
+  "kCCCCCCk"
+ ],
+ "pocion_4": [
+  "..knnk..",
+  "..keek..",
+  "..keek..",
+  "..kkkk..",
+  ".kwrrrk.",
+  "krrrrrrk",
+  "krrrrrrk",
+  "krrrrrrk",
+  "krrrrrrk",
+  ".krrrrk."
+ ],
+ "pocion_5": [
+  "..knnk..",
+  "..keek..",
+  ".kggggk.",
+  ".kggggk.",
+  ".kwgggk.",
+  ".kggggk.",
+  ".kggggk.",
+  ".kggggk.",
+  ".kggggk.",
+  ".kggggk."
+ ],
+ "ladrillo": [
+  "ZZZZZZZZZZZZ",
+  "Zzzzzzzzzzzz",
+  "Zzzzzzzzzzzz",
+  "Zzzzzzzzzzzz",
+  "ZZZZZZZZZZZZ",
+  "zzzzzzZzzzzz",
+  "zzzzzzZzzzzz",
+  "zzzzzzZzzzzz"
  ]
 });
   // --- fin tienda ---

@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v9</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v10</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v9</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v10</div>`;
     montarSabio();
     montarGato();
   }
@@ -292,19 +292,21 @@
         </div>
         ${limites ? barraMP(r.total, limites) : ''}
       </section>
-      <nav class="win menu-gato" aria-label="Menú">
-        <ul class="menu">
-          ${opciones.map(([id, txt, extra], i) => `<li><button class="item px ${i === st.menuSel ? 'sel' : ''}" data-menu="${i}" data-ir="${id}">${txt}${extra}</button></li>`).join('')}
+      <nav class="win menu-gato ${st.gato && !st.gato.cerrado ? 'con-dialogo' : ''}" aria-label="Menú" style="--ladrillo:${fondoSprite('ladrillo')}">
+        <ul class="menu estantes">
+          ${opciones.map(([id, txt, extra], i) => `<li style="--pocion:${fondoSprite('pocion_' + (i + 1))}"><button class="item px ${i === st.menuSel ? 'sel' : ''}" data-menu="${i}" data-ir="${id}">${txt}${extra}</button></li>`).join('')}
         </ul>
         <button class="gato-btn" id="gato" type="button" aria-label="Maese Ronroneo, el gato del mercado: toca para que te lea una carta">
           <span class="tienda" aria-hidden="true">
-            <span class="cielo" id="cielo"></span>
-            <span class="astro" id="astro"></span>
-            <span class="estrellas-cielo" id="estrellas">${'<i></i>'.repeat(7)}</span>
-            <span class="escena">${Sprites.svg('tienda')}</span>
-            <span class="sprite gato-sprite" id="gato-sprite" data-anim="gato_1" data-modo="siempre">${Sprites.svg('gato_1')}</span>
+            <span class="letrero px">✦ Tócame ✦</span>
+            <span class="tienda-caja">
+              <span class="cielo" id="cielo"></span>
+              <span class="astro" id="astro"></span>
+              <span class="estrellas-cielo" id="estrellas">${'<i></i>'.repeat(7)}</span>
+              <span class="escena">${Sprites.svg('tienda')}</span>
+              <span class="sprite gato-sprite" id="gato-sprite" data-anim="gato_1" data-modo="siempre">${Sprites.svg('gato_1')}</span>
+            </span>
           </span>
-          <span class="px toca">✦ Tócame ✦</span>
         </button>
       </nav>
       ${st.gato && !st.gato.cerrado ? `<section class="win gato-dialogo" id="gato-dialogo" aria-live="polite">
@@ -643,6 +645,10 @@
   }
 
   const vozGato = () => tono([360 + Math.round(Math.random() * 120)], 0.03, 'triangle');
+
+  // Sprite como imagen de fondo CSS (para el ladrillo y las pociones de los estantes).
+  const cacheFondo = {};
+  const fondoSprite = n => cacheFondo[n] || (cacheFondo[n] = `url('data:image/svg+xml,${encodeURIComponent(Sprites.svg(n))}')`);  // comillas simples: va dentro de style="..." 
 
   // Cielo de la ventana según la hora: amanecer, día, atardecer o noche.
   function pintarCielo() {

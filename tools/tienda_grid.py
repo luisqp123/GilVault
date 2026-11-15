@@ -89,4 +89,38 @@ def astro(tipo):
             if g[y][x] == 'm': g[y][x] = 's'
     return [''.join(f) for f in g]
 
-print(json.dumps({'tienda': escena(), 'sol': astro('sol'), 'luna': astro('luna')}, indent=1))
+def pocion(liquido, forma):
+    """Pocioncita de adorno para los estantes del menú (8x10)."""
+    g = lienzo(8, 10)
+    def r(x0, y0, x1, y1, c):
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1): g[y][x] = c
+    if forma == 'redonda':
+        for y in range(3, 10):
+            for x in range(8):
+                if (x - 3.5) ** 2 + (y - 6.5) ** 2 <= 10: g[y][x] = liquido
+        r(3, 1, 4, 2, 'e'); r(3, 0, 4, 0, 'n')
+    elif forma == 'alta':
+        r(2, 2, 5, 9, liquido); r(3, 1, 4, 1, 'e'); r(3, 0, 4, 0, 'n')
+    else:  # frasco
+        r(1, 3, 6, 9, liquido); r(1, 2, 6, 2, 'n')
+    g[4][2] = 'w'
+    contorno_g = [f[:] for f in g]
+    for y in range(10):
+        for x in range(8):
+            if g[y][x] == '.' and any(0 <= x+dx < 8 and 0 <= y+dy < 10 and contorno_g[y+dy][x+dx] != '.'
+                                      for dx, dy in ((1,0),(-1,0),(0,1),(0,-1))):
+                g[y][x] = 'k'
+    return [''.join(f) for f in g]
+
+def ladrillo():
+    """Baldosa de pared que se repite de fondo (12x8)."""
+    g = lienzo(12, 8, 'z')
+    for x in range(12): g[0][x] = 'Z'; g[4][x] = 'Z'
+    g[1][0] = g[2][0] = g[3][0] = 'Z'; g[5][6] = g[6][6] = g[7][6] = 'Z'
+    return [''.join(f) for f in g]
+
+print(json.dumps({'tienda': escena(), 'sol': astro('sol'), 'luna': astro('luna'),
+                  'pocion_1': pocion('p', 'redonda'), 'pocion_2': pocion('v', 'alta'),
+                  'pocion_3': pocion('C', 'frasco'), 'pocion_4': pocion('r', 'redonda'),
+                  'pocion_5': pocion('g', 'alta'), 'ladrillo': ladrillo()}, indent=1))
