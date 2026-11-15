@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v7</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v8</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,8 +223,9 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v7</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v8</div>`;
     montarSabio();
+    montarGato();
   }
 
   function avisos() {
@@ -291,11 +292,20 @@
         </div>
         ${limites ? barraMP(r.total, limites) : ''}
       </section>
-      <nav class="win" aria-label="Menú">
+      <nav class="win menu-gato" aria-label="Menú">
         <ul class="menu">
           ${opciones.map(([id, txt, extra], i) => `<li><button class="item px ${i === st.menuSel ? 'sel' : ''}" data-menu="${i}" data-ir="${id}">${txt}${extra}</button></li>`).join('')}
         </ul>
+        <button class="gato-btn" id="gato" type="button" aria-label="Maese Ronroneo, el gato del mercado: toca para que te lea una carta">
+          <span class="sprite gato-sprite" id="gato-sprite" data-anim="gato_1" data-modo="siempre">${Sprites.svg('gato_1')}</span>
+          <span class="px toca">✦ Tócame ✦</span>
+        </button>
       </nav>
+      ${st.gato && !st.gato.cerrado ? `<section class="win gato-dialogo" id="gato-dialogo" aria-live="polite">
+        <div class="fila"><span class="px oro grow" style="font-size:9px">Maese Ronroneo · dueño del mercado</span>
+          <button class="btn mini" data-accion="cerrar-gato" aria-label="Cerrar">✕</button></div>
+        <p id="gato-texto" style="margin:6px 0 0;min-height:3.6em"></p><span class="sigue" id="gato-sigue">▼</span>
+      </section>` : ''}
       <section class="win">
         <h2 class="titulo">Último botín</h2>
         ${ultimos.length ? `<ul class="menu">${ultimos.map(filaMov).join('')}</ul>` : `<div class="vacio">El cofre está vacío este mes.</div>`}
@@ -548,6 +558,150 @@
     if (d.recurrentes.length) m.push(`Siento cobros que vuelven cada mes: ${d.recurrentes.map(x => x.lugar).slice(0, 3).join(', ')}. ¿Aún los usas todos?`);
     m.push('Toca para escucharme de nuevo. Que tus giles se multipliquen.');
     return m;
+  }
+
+  // ---------------------------------------------------------------- Maese Ronroneo, el gato del mercado
+  const azar = a => a[Math.floor(Math.random() * a.length)];
+  const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+
+  // Cambio euro/dólar del Banco Central Europeo (servicio público Frankfurter), guardado un día.
+  async function mercado() {
+    const c = ls.get('gv_mercado', null);
+    if (c && c.dia === hoyISO()) return c;
+    const desde = new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10);
+    for (const base of ['https://api.frankfurter.dev/v1/', 'https://api.frankfurter.app/']) {
+      try {
+        const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 5000);
+        const r = await fetch(`${base}${desde}..?from=EUR&to=USD`, { signal: ctrl.signal });
+        clearTimeout(t);
+        if (!r.ok) continue;
+        const j = await r.json();
+        const fechas = Object.keys(j.rates || {}).sort();
+        if (fechas.length < 2) continue;
+        const hoy = j.rates[fechas[fechas.length - 1]].USD, ayer = j.rates[fechas[fechas.length - 2]].USD;
+        const m = { dia: hoyISO(), usd: hoy, cambio: (hoy - ayer) / ayer * 100 };
+        ls.set('gv_mercado', m);
+        return m;
+      } catch (e) { }
+    }
+    return null;
+  }
+
+  function semanaVsAnterior() {
+    const movs = (st.datos && st.datos.movimientos) || [];
+    const ahora = Date.now(), dia = 86400000;
+    let esta = 0, antes = 0;
+    movs.forEach(m => {
+      const t = ahora - new Date(m.fecha).getTime();
+      if (t < 7 * dia) esta += m.monto; else if (t < 14 * dia) antes += m.monto;
+    });
+    return antes > 0 ? { esta, antes, cambio: (esta - antes) / antes * 100 } : null;
+  }
+
+  async function saludoGato() {
+    const h = new Date().getHours();
+    const partes = [];
+    partes.push(h < 6 ? '¿Despierto a estas horas, viajero? Los mercados nunca duermen… y yo tampoco.'
+      : h < 13 ? '¡Buenos días, viajero! Bienvenido a mi mercado.'
+        : h < 20 ? '¡Buenas tardes, viajero! Pasa, que las cartas ya están sobre la mesa.'
+          : '¡Buenas noches, viajero! La vela aún arde para ti.');
+    const m = await mercado();
+    if (m) {
+      const sube = m.cambio >= 0;
+      partes.push(`Las cartas del mercado dicen: 1 € vale ${m.usd.toFixed(4).replace('.', ',')} $, ${sube ? '▲' : '▼'} ${Math.abs(m.cambio).toFixed(2).replace('.', ',')}% desde la última sesión. ${sube ? 'El euro se fortalece: buen momento si compras en dólares.' : 'El euro se debilita un poco: paciencia con las compras en dólares.'}`);
+    }
+    const s = semanaVsAnterior();
+    if (s) {
+      partes.push(s.cambio > 10 ? `Esta semana gastaste ${euros(s.esta)}, un ${Math.round(s.cambio)}% más que la anterior. Tus fluctuaciones suben…`
+        : s.cambio < -10 ? `Esta semana gastaste ${euros(s.esta)}, un ${Math.round(-s.cambio)}% menos que la anterior. ¡Así se hace!`
+          : `Esta semana gastaste ${euros(s.esta)}, casi lo mismo que la anterior. Mercado estable.`);
+    }
+    const top = st.datos && st.datos.resumen && st.datos.resumen.mayorCategoria;
+    const pct = top ? (st.datos.resumen.categorias.find(c => c.categoria === top) || {}).porcentaje : 0;
+    partes.push('Consejo del día: ' + (top && pct >= 35 && Math.random() < 0.6 ? Gato.CONSEJOS_CATEGORIA[top] : azar(Gato.CONSEJOS)));
+    partes.push('Tócame si quieres que te lea una carta.');
+    return partes;
+  }
+
+  // Escribe un texto letra a letra; devuelve un control para completarlo de golpe.
+  function escribir($el, texto, alTerminar, voz) {
+    let i = 0;
+    if (menosMovimiento()) { $el.textContent = texto; alTerminar && alTerminar(); return { completar() { } }; }
+    const t = setInterval(() => {
+      if (!document.body.contains($el)) { clearInterval(t); return; }
+      i++; $el.textContent = texto.slice(0, i);
+      if (voz && i % 2 === 0 && texto[i - 1] !== ' ') voz();
+      if (i >= texto.length) { clearInterval(t); alTerminar && alTerminar(); }
+    }, 32);
+    return { completar() { if (i < texto.length) { i = texto.length - 1; } } };
+  }
+
+  const vozGato = () => tono([360 + Math.round(Math.random() * 120)], 0.03, 'triangle');
+
+  function montarGato() {
+    const $gato = document.getElementById('gato');
+    if (!$gato) return;
+    $gato.onclick = () => { sfx.cursor(); leerCarta(); };
+    // Saludo: una vez por sesión, al entrar en el inicio.
+    if (!st.gato) {
+      st.gato = { partes: null, i: 0, cerrado: false };
+      saludoGato().then(p => { st.gato.partes = p; if (ruta().vista === 'inicio') render(); });
+      return;
+    }
+    const $txt = document.getElementById('gato-texto');
+    if (!$txt || !st.gato.partes) return;
+    const $spr = document.getElementById('gato-sprite'), $sigue = document.getElementById('gato-sigue');
+    let ctl = null, hablando = false;
+    const decir = () => {
+      hablando = true; $sigue.style.visibility = 'hidden'; $spr.dataset.anim = 'gato_habla';
+      ctl = escribir($txt, st.gato.partes[st.gato.i], () => {
+        hablando = false; $sigue.style.visibility = 'visible'; $spr.dataset.anim = 'gato_1';
+      }, vozGato);
+    };
+    document.getElementById('gato-dialogo').onclick = e => {
+      if (e.target.closest('[data-accion="cerrar-gato"]')) { st.gato.cerrado = true; sfx.cursor(); render(); return; }
+      if (hablando) { ctl.completar(); return; }
+      if (st.gato.i < st.gato.partes.length - 1) { st.gato.i++; sfx.cursor(); decir(); }
+      else { st.gato.cerrado = true; render(); }
+    };
+    decir();
+  }
+
+  function leerCarta() {
+    const [num, nombre, lectura] = azar(Gato.CARTAS);
+    // Datos sin repetir hasta agotar la baraja de curiosidades.
+    let orden = ls.get('gv_datos_orden', []);
+    if (!orden.length) orden = Gato.DATOS.map((_, i) => i).sort(() => Math.random() - 0.5);
+    const dato = Gato.DATOS[orden.shift()] || azar(Gato.DATOS);
+    ls.set('gv_datos_orden', orden);
+    const $spr = document.getElementById('gato-sprite');
+    if ($spr) { $spr.dataset.anim = ''; $spr.dataset.f = 'gato_carta'; $spr.innerHTML = Sprites.svg('gato_carta'); }
+    $modal.innerHTML = `<div class="win" style="text-align:center">
+      <p class="px oro" style="font-size:10px">Maese Ronroneo baraja las cartas…</p>
+      <div class="carta" id="carta"><div class="cara dorso"></div>
+        <div class="cara frente"><span class="px num-carta">${esc(num)}</span><span class="estrellas">✦ ✦ ✦</span><span class="px nombre-carta">${esc(nombre)}</span></div></div>
+      <p id="carta-lectura" style="min-height:2.4em;margin:10px 0 4px"></p>
+      <p class="dim" id="carta-dato" style="min-height:2.4em;margin:0;font-size:20px"></p>
+      <div class="botones"><button class="btn oro" data-accion="cerrar-carta">Gracias, maese</button></div>
+    </div>`;
+    $modal.hidden = false;
+    let ctl = null;
+    setTimeout(() => {
+      const $c = document.getElementById('carta'); if (!$c) return;
+      $c.classList.add('volteada'); sfx.ok();
+      setTimeout(() => {
+        const $l = document.getElementById('carta-lectura'), $d = document.getElementById('carta-dato');
+        if (!$l) return;
+        ctl = escribir($l, `${nombre}: ${lectura}`, () => { ctl = escribir($d, 'Dato curioso: ' + dato, null, vozGato); }, vozGato);
+      }, menosMovimiento() ? 0 : 700);
+    }, menosMovimiento() ? 0 : 700);
+    $modal.onclick = e => {
+      if (e.target === $modal || e.target.closest('[data-accion="cerrar-carta"]')) {
+        cerrarModal();
+        const s2 = document.getElementById('gato-sprite');
+        if (s2) { s2.dataset.anim = 'gato_1'; }
+      } else if (ctl) ctl.completar();
+    };
   }
 
   let sabioT = null;
