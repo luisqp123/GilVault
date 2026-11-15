@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v15</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v16</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig, mochila: vMochila };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v15</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v16</div>`;
     montarSabio();
     montarGato();
     montarAventura();
@@ -405,24 +405,41 @@
     const e = estadoActual(), inv = inventario();
     const { total, bonus } = Aventura.aplicarEquipo(e.base, inv);
     const [titulo, desc] = Aventura.TEXTO_ESTADO[e.estado];
-    const clase = e.energia >= 50 ? '' : e.energia >= 25 ? 'medio' : 'bajo';
-    return `<section class="win heroe estado-${e.estado}">
-      <div class="fila"><button class="px oro nombre-heroe grow" data-accion="renombrar" title="Cambiar nombre">${esc(inv.nombre)} ✎</button>
-        <span class="px">LV ${e.nivel}</span></div>
-      <div class="heroe-grid">
-        <div class="heroe-fig">
+    // Anillo: puntos alrededor del personaje y los objetos de la mochila colocados sobre él.
+    const N = 28, puntos = Array.from({ length: N }, (_, i) => {
+      const a = i / N * Math.PI * 2;
+      return `<i class="punto" style="left:${50 + Math.cos(a) * 46}%;top:${50 + Math.sin(a) * 46}%"></i>`;
+    }).join('');
+    const puestos = new Set(Object.values(inv.equipo));
+    const objs = inv.objetos.slice(-12);
+    const iconos = objs.map((o, i) => {
+      const a = -Math.PI / 2 + (i + 0.5) / Math.max(objs.length, 8) * Math.PI * 2;
+      const r = Aventura.RAREZAS[o.rareza];
+      return `<span class="anillo-obj ${puestos.has(o.id) ? 'puesto' : ''}" title="${esc(o.nombre)}"
+        style="left:${50 + Math.cos(a) * 46}%;top:${50 + Math.sin(a) * 46}%;--rareza:${r.color}">${Sprites.svg('equipo_' + o.ranura)}</span>`;
+    }).join('');
+    const placa = (k, val, max, extra) => `<div class="placa" title="${esc(Aventura.AYUDA[k] || '')}">
+        <span class="placa-k">${k}</span><span class="placa-v">${val}${extra || ''}</span>
+        <span class="placa-barra"><i style="width:${Math.round(val / max * 100)}%"></i></span></div>`;
+    return `<section class="estado-bs estado-${e.estado}">
+      <div class="bs-cabecera">
+        <span class="px bs-lv">LV ${e.nivel}</span>
+        <button class="bs-nombre" data-accion="renombrar" title="Cambiar nombre">${esc(inv.nombre)}</button>
+        <span class="px bs-estado">${titulo}</span>
+      </div>
+      <div class="bs-cuerpo">
+        <div class="bs-placas">
+          ${placa('EN', e.energia, 100)}
+          ${Aventura.ATRIBUTOS.map(k => placa(k, total[k], 99, bonus[k] ? `<small class="${bonus[k] > 0 ? 'mas' : 'menos'}">${bonus[k] > 0 ? '+' : ''}${bonus[k]}</small>` : '')).join('')}
+        </div>
+        <div class="bs-anillo">
+          ${puntos}
           <span class="sprite heroe-sprite" data-anim="heroe_${e.estado}" data-modo="siempre">${Sprites.svg('heroe_' + e.estado + '_1')}</span>
           ${e.estado === 'energia' ? `<span class="aura" aria-hidden="true">${'<i></i>'.repeat(6)}</span>` : ''}
-        </div>
-        <div class="heroe-datos">
-          <div class="px estado-txt">${titulo}</div>
-          <p class="dim" style="font-size:17px;margin:2px 0 6px">${desc}</p>
-          <div class="hp ${clase}"><div class="lbl"><span class="dim">Energía</span><span class="num">${e.energia}/100</span></div>
-            <div class="barra"><i style="width:${e.energia}%"></i></div></div>
-          ${Aventura.ATRIBUTOS.map(k => filaAtributo(k, total[k], bonus[k])).join('')}
+          ${iconos}
         </div>
       </div>
-      <div class="botones"><button class="btn" data-ir="mochila">Mochila (${inv.objetos.length})</button></div>
+      <button class="bs-pie" data-ir="mochila"><span class="mano-bs" aria-hidden="true"></span>${esc(desc)} <span class="bs-mochila">Mochila (${inv.objetos.length}) ▸</span></button>
     </section>`;
   }
 

@@ -1,22 +1,21 @@
-# Genera el personaje del usuario en alta densidad (48x68): viajero con pelo rizado recogido
-# en moño, barba con canas, lentes, camiseta azul marino, pantalón ancho con pliegues
-# recogido bajo la rodilla, vendas en las pantorrillas, botas, mochila con esterilla y bastón.
-# Cuatro estados de energía x 2 cuadros, más los íconos de las ranuras de equipo.
+# Personaje del usuario en vista 3/4, estilo retro de paleta reducida y
+# contorno marrón. Pelo recogido en moño, barba, lentes, camiseta azul verdosa, pantalón gris,
+# botas, mochila de cuero con esterilla y bastón. 4 estados x 2 cuadros + íconos de equipo.
 import json
 
 def lienzo(w, h): return [['.'] * w for _ in range(h)]
 
-def contorno(g):
+def contorno(g, c='D'):
     H, W = len(g), len(g[0])
     m = [[g[y][x] != '.' for x in range(W)] for y in range(H)]
     for y in range(H):
         for x in range(W):
             if g[y][x] == '.' and any(0 <= x+dx < W and 0 <= y+dy < H and m[y+dy][x+dx]
                                       for dx, dy in ((1,0),(-1,0),(0,1),(0,-1))):
-                g[y][x] = 'k'
+                g[y][x] = c
 
 def heroe(estado='normal', respira=False):
-    W, H = 48, 68
+    W, H = 40, 58
     g = lienzo(W, H)
     def p(x, y, c):
         if 0 <= x < W and 0 <= y < H: g[y][x] = c
@@ -28,109 +27,83 @@ def heroe(estado='normal', respira=False):
             for x in range(int(cx - rx) - 1, int(cx + rx) + 2):
                 if ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1: p(x, y, c)
 
-    dy = {'energia': -1, 'normal': 0, 'cansado': 2, 'agotado': 4}[estado] + (1 if respira else 0)
-    dx = 2 if estado == 'agotado' else 0          # se inclina hacia el bastón
+    dy = {'energia': -1, 'normal': 0, 'cansado': 1, 'agotado': 3}[estado] + (1 if respira else 0)
 
-    # ---------------- Piernas: pantalón ancho con pliegues, vendas y botas (fijas) ----------------
-    for (x0, x1) in ((18, 27), (29, 38)):          # dos perneras abombadas
-        for y in range(45, 58):
-            t = (y - 45) / 12
-            ancho = 1 + int(3.4 * (1 - (2 * t - 1) ** 2))   # abombado: más ancho a media pierna
-            a, b = x0 - ancho + (1 if y > 55 else 0), x1 + ancho - (1 if y > 55 else 0)
-            r(a, y, b, y, 'M'); r(a, y, a + 1, y, 'B'); r(b - 2, y, b, y, 'G')
-    r(28, 45, 28, 54, 'G')                          # entrepierna
-    for (x, y) in [(20, 47), (21, 48), (22, 49), (23, 50), (31, 47), (32, 48), (33, 49), (34, 50),
-                   (24, 52), (25, 53), (26, 54), (35, 52), (36, 53), (37, 54), (19, 51), (30, 51)]:
-        p(x, y, 'G')                                 # pliegues diagonales
-    for (x, y) in [(21, 49), (22, 50), (32, 49), (33, 50), (25, 54), (36, 54)]:
-        p(x, y, 'h')                                 # fondo de los pliegues
-    for (x, y) in [(19, 47), (20, 48), (30, 47), (31, 48)]:
-        p(x, y, 'B')                                 # brillo sobre los pliegues
-    r(20, 56, 26, 57, 'G'); r(31, 56, 37, 57, 'G')  # dobladillo recogido
-    for (x0, x1) in ((20, 25), (31, 36)):           # vendas en la pantorrilla
-        for y in range(58, 62):
-            r(x0, y, x1, y, 'e' if y % 2 else 'E')
-    for (x0, x1) in ((18, 26), (30, 39)):           # botas de montaña
-        r(x0 + 1, 62, x1, 64, 'h'); r(x0, 64, x1 + 1, 65, 'h')
-        r(x0, 66, x1 + 1, 66, 'j'); p(x0 + 3, 62, 'o'); p(x0 + 5, 63, 'o')
-        r(x0 + 1, 62, x0 + 2, 63, 'G')
+    # ---------- Mochila (asoma detrás del hombro derecho, vista 3/4) ----------
+    by = 21 + dy
+    r(24, by, 31, by + 15, 'b'); r(29, by, 31, by + 15, 'n')
+    r(26, by + 2, 28, by + 3, 'g')                                       # hebilla
+    r(25, by + 8, 30, by + 12, 'n'); r(26, by + 9, 29, by + 11, 'b')    # bolsillo
+    r(22, by - 4, 32, by - 1, 'E'); r(22, by - 4, 32, by - 4, 'e')      # esterilla enrollada
+    for x in (24, 29): r(x, by - 4, x, by - 1, 'n')
 
-    # ---------------- Mochila (detrás) con esterilla enrollada ----------------
-    by = 22 + dy; bx = dx
-    r(6 + bx, by, 21 + bx, by + 25, 'h'); r(7 + bx, by + 1, 9 + bx, by + 24, 'G')
-    r(10 + bx, by + 12, 20 + bx, by + 22, 'G'); r(10 + bx, by + 12, 20 + bx, by + 12, 'k')
-    r(14 + bx, by + 15, 16 + bx, by + 15, 'o')      # tirador naranja del bolsillo
-    r(19 + bx, by + 2, 20 + bx, by + 10, 'j')       # costura lateral
-    for x in range(4, 23):                          # esterilla tipo acordeón
-        c = 'm' if (x // 2) % 2 else 'B'
-        r(x + bx, by - 7, x + bx, by - 1, c)
-    r(4 + bx, by - 4, 22 + bx, by - 4, 'G')         # correa que la sujeta
+    # ---------- Torso 3/4: camiseta azul verdosa ----------
+    ty = 22 + dy
+    r(12, ty, 25, 39, 'U'); r(21, ty, 25, 39, 'W')
+    r(15, ty, 21, ty, 'W')                                  # cuello
+    r(13, ty, 14, 37, 'n'); r(22, ty, 23, 37, 'n')          # correas de la mochila
+    r(13, ty + 7, 23, ty + 7, 'n'); p(18, ty + 7, 'g')      # correa de pecho
+    r(12, 38, 25, 39, 'n'); p(18, 38, 'g')                  # cinturón
+    r(26, ty + 2, 27, ty + 9, 'W')                          # brazo lejano
 
-    # ---------------- Torso: camiseta azul marino ----------------
-    ty = 27 + dy; tx = dx
-    r(19 + tx, ty, 36 + tx, 44, 'a'); r(19 + tx, ty, 21 + tx, 44, 'u'); r(33 + tx, ty, 36 + tx, 44, 'A')
-    r(24 + tx, ty, 31 + tx, ty, 'A')                # cuello
-    for (x, y) in [(27, 6), (28, 7), (26, 9), (29, 10)]: p(x + tx, ty + y, 'A')   # dibujo de montañas
-    r(22 + tx, ty, 23 + tx, 44, 'k'); r(22 + tx, ty + 1, 22 + tx, 42, 'h')         # correa de hombro
-    r(22 + tx, ty + 7, 31 + tx, ty + 7, 'k'); r(26 + tx, ty + 6, 27 + tx, ty + 8, 'o')  # correa de pecho + hebilla
-    r(19, 44, 37, 45, 'n'); r(27, 44, 28, 45, 'g')  # cinturón con hebilla
+    # ---------- Brazo cercano y bastón ----------
+    caida = 2 if estado == 'agotado' else 0
+    r(9, ty + 1, 12, ty + 8 + caida, 'U'); r(9, ty + 1, 9, ty + 8 + caida, 'W')
+    r(8, ty + 9 + caida, 11, ty + 11 + caida, 'K'); r(11, ty + 10 + caida, 11, ty + 11 + caida, 'N')
+    r(6, 9, 7, 53, 'b'); r(7, 9, 7, 53, 'n')                # bastón
+    r(5, 6, 8, 9, 'n'); r(6, 6, 7, 7, 'b')                  # pomo
 
-    # ---------------- Brazo y bastón ----------------
+    # ---------- Piernas 3/4 ----------
+    r(13, 40, 18, 48, 'Y'); r(20, 40, 25, 48, 'Y')
+    r(17, 40, 18, 48, 'd'); r(24, 40, 25, 48, 'd')
+    r(12, 49, 18, 52, 'n'); r(19, 49, 25, 52, 'n')
+    r(12, 49, 14, 50, 'b'); r(19, 49, 21, 50, 'b')
+    r(11, 53, 18, 53, 'D'); r(19, 53, 26, 53, 'D')
+
+    # ---------- Cabeza 3/4 (mira un poco a la izquierda) ----------
+    hy = 2 + dy
+    elipse(18, 12 + hy, 7.5, 8.5, 'K')
+    r(22, 7 + hy, 25, 17 + hy, 'N')                         # lado en sombra
+    elipse(19, 4 + hy, 8, 3.6, 'H')                         # pelo peinado hacia atrás
+    r(23, 4 + hy, 27, 12 + hy, 'H')
+    for (x, y) in [(14, 2), (19, 1), (24, 3), (26, 9)]: p(x, y + hy, 'I')
+    elipse(27, 2 + hy, 2.6, 2.6, 'H'); p(26, 1 + hy, 'I')   # moño
+    r(25, 4 + hy, 26, 4 + hy, 'r')                          # gomita roja
+    r(24, 11 + hy, 25, 13 + hy, 'K'); p(25, 12 + hy, 'N')   # oreja
+    # cejas
+    r(12, 9 + hy, 14, 9 + hy, 'H'); r(18, 9 + hy, 21, 9 + hy, 'H')
+    # lentes: dos cristales, puente y patilla
+    for (x0, x1) in ((11, 15), (17, 22)):                   # montura fina: arriba y a los lados
+        r(x0, 10 + hy, x1, 10 + hy, 'D')
+        p(x0, 11 + hy, 'D'); p(x1, 11 + hy, 'D'); p(x0, 12 + hy, 'I'); p(x1, 12 + hy, 'I')
+    p(16, 10 + hy, 'D'); r(23, 10 + hy, 24, 10 + hy, 'D')
     if estado == 'agotado':
-        r(36 + tx, ty + 1, 38 + tx, ty + 5, 'a'); r(37 + tx, ty + 6, 39 + tx, ty + 10, 'f'); mano_y = ty + 11
-    else:
-        r(35, ty + 1, 38, ty + 6, 'a'); r(38, ty + 1, 38, ty + 6, 'A')
-        r(36, ty + 7, 38, ty + 13, 'f'); r(38, ty + 8, 38, ty + 13, 'F'); mano_y = ty + 13
-    r(41, 25, 42, 66, 'C'); r(41, 25, 41, 66, 'c')                     # bastón azul
-    r(40, 22, 43, 24, 'k'); r(41, mano_y - 2, 42, mano_y + 3, 'k')     # pomo y empuñadura
-    r(38, mano_y, 41, mano_y + 2, 'f'); r(39, mano_y + 2, 41, mano_y + 2, 'F')   # mano
-    r(41, 64, 42, 66, 'h')                                             # punta
-
-    # ---------------- Cabeza (grande, estilo chibi) ----------------
-    hy = 1 + dy; hx = dx
-    elipse(27.5 + hx, 15 + hy, 9, 11, 'f')                             # cara
-    for y in range(6 + hy, 26 + hy):                                   # sombra del lado derecho
-        for x in range(33 + hx, 38 + hx):
-            if g[y][x] == 'f': p(x, y, 'F')
-    # pelo rizado: casquete y parte de atrás (textura suave)
-    elipse(26 + hx, 8 + hy, 10, 6.5, 'j')
-    r(17 + hx, 8 + hy, 21 + hx, 19 + hy, 'j')
-    for (x, y) in [(20, 4), (25, 3), (30, 4), (18, 10), (23, 6), (33, 7), (19, 15)]: p(x + hx, y + hy, 'J')
-    r(22 + hx, 11 + hy, 35 + hx, 12 + hy, 'f')                         # frente despejada
-    elipse(14 + hx, 5 + hy, 4, 4, 'j'); p(13 + hx, 4 + hy, 'J')        # moño
-    r(17 + hx, 6 + hy, 18 + hx, 7 + hy, 'r')                           # gomita roja
-    # oreja (simple)
-    r(20 + hx, 15 + hy, 21 + hx, 18 + hy, 'f')
-    # lentes: solo la montura superior y los lados, finos
-    for (x0, x1) in ((23, 28), (29, 34)):
-        r(x0 + hx, 14 + hy, x1 + hx, 14 + hy, 'h')
-        r(x0 + hx, 15 + hy, x0 + hx, 16 + hy, 'h'); r(x1 + hx, 15 + hy, x1 + hx, 16 + hy, 'h')
-    r(21 + hx, 14 + hy, 22 + hx, 14 + hy, 'h')
-    # ojos: dos píxeles
-    if estado == 'agotado':
-        r(25 + hx, 16 + hy, 26 + hx, 16 + hy, 'F'); r(31 + hx, 16 + hy, 32 + hx, 16 + hy, 'F')
+        r(13, 12 + hy, 14, 12 + hy, 'D'); r(19, 12 + hy, 20, 12 + hy, 'D')
     elif estado == 'cansado':
-        r(25 + hx, 16 + hy, 26 + hx, 16 + hy, 'n'); r(31 + hx, 16 + hy, 32 + hx, 16 + hy, 'n')
+        r(13, 12 + hy, 14, 12 + hy, 'D'); r(19, 12 + hy, 20, 12 + hy, 'D')
+        r(13, 11 + hy, 14, 11 + hy, 'N'); r(19, 11 + hy, 20, 11 + hy, 'N')
     else:
-        r(26 + hx, 15 + hy, 26 + hx, 16 + hy, 'n'); r(31 + hx, 15 + hy, 31 + hx, 16 + hy, 'n')
-    # barba: forma lisa en la mandíbula, con dos canas
-    for y in range(21, 28):
-        x0 = 21 + (y - 21) // 2; x1 = 36 - (y - 21) // 2
-        r(x0 + hx, y + hy, x1 + hx, y + hy, 'J')
-    p(25 + hx, 25 + hy, 'M'); p(32 + hx, 23 + hy, 'M')
-    # boca
+        r(13, 11 + hy, 13, 12 + hy, 'D'); r(19, 11 + hy, 19, 12 + hy, 'D')
+    p(15, 14 + hy, 'N'); p(16, 14 + hy, 'N')                # nariz
+    # barba corta: bigote fino y mandíbula (las mejillas quedan a la vista)
+    r(14, 15 + hy, 19, 15 + hy, 'H')
+    for y in range(17, 21):
+        x0 = 12 + max(0, y - 18); x1 = 23 - max(0, y - 18)
+        r(x0, y + hy, x1, y + hy, 'H')
+    r(12, 16 + hy, 13, 16 + hy, 'H'); r(21, 16 + hy, 23, 16 + hy, 'H')
+    p(15, 19 + hy, 'I'); p(20, 18 + hy, 'I')
     if estado == 'energia':
-        r(28 + hx, 23 + hy, 32 + hx, 23 + hy, 'w')
-    elif estado == 'agotado':
-        r(29 + hx, 23 + hy, 30 + hx, 23 + hy, 'f')
+        r(14, 17 + hy, 19, 17 + hy, 'w')
+    elif estado != 'agotado':
+        r(15, 17 + hy, 18, 17 + hy, 'N')
     else:
-        r(28 + hx, 23 + hy, 31 + hx, 23 + hy, 'f')
+        r(16, 17 + hy, 17, 17 + hy, 'N')
+    r(16, 21 + hy, 20, 21 + hy, 'N')                        # cuello
     contorno(g)
-    # gotas de sudor (sin contorno)
-    if estado in ('cansado', 'agotado'):
-        p(38 + hx, 9 + hy, 'c'); p(38 + hx, 10 + hy, 'C'); p(39 + hx, 10 + hy, 'c')
+    if estado in ('cansado', 'agotado'):                    # sudor (sin contorno)
+        p(28, 8 + hy, 'c'); p(28, 9 + hy, 'C')
     if estado == 'agotado':
-        p(17 + hx, 21 + hy, 'c'); p(17 + hx, 22 + hy, 'C')
+        p(9, 4 + hy, 'c'); p(9, 5 + hy, 'C')
     return [''.join(f) for f in g]
 
 def icono(tipo):
@@ -150,7 +123,7 @@ def icono(tipo):
                 if (x - 5.5) ** 2 + (y - 6) ** 2 <= 20: g[y][x] = 'g'
                 if (x - 5.5) ** 2 + (y - 6) ** 2 <= 9: g[y][x] = 'e'
         g[4][5] = 'r'; g[5][5] = 'r'; g[7][6] = 'k'; g[1][5] = 'O'; g[0][5] = 'O'
-    contorno(g)
+    contorno(g, 'k')
     return [''.join(f) for f in g]
 
 frames = {}
