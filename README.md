@@ -27,13 +27,13 @@ Tu inventario de gastos con estilo de JRPG retro. Cada vez que pagas con la tarj
 
 ### Paso 0 — Publicar la app
 
-Al hacer merge a `main`, el workflow ejecuta las pruebas y publica `app/` en GitHub Pages: **https://argo123.github.io/GilVault/**. La primera vez hay que activar **Settings → Pages → Source: GitHub Actions**.
+Al hacer merge a `main`, el workflow ejecuta las pruebas y publica `app/` en GitHub Pages, en `https://<tu-usuario>.github.io/GilVault/`. La primera vez hay que activar **Settings → Pages → Source: GitHub Actions**.
 
 > También puedes publicarla en Netlify (sirve si el repositorio es privado): el archivo `netlify.toml` ya está listo.
 
 ### Paso 1 — Copiar el código del script
 
-1. Abre en Chrome: **https://raw.githubusercontent.com/argo123/GilVault/main/apps-script/Code.gs**
+1. Abre el archivo [`apps-script/Code.gs`](apps-script/Code.gs) y pulsa **Raw** (o el botón de copiar) para ver el código completo.
 2. Mantén pulsado el texto → **Seleccionar todo** → **Copiar**.
 
 ### Paso 2 — Crear la Google Sheet con el script
@@ -89,6 +89,15 @@ Instala [MacroDroid](https://play.google.com/store/apps/details?id=com.arlosoft.
 ### Si cambias el código del script más adelante
 
 Pega el código nuevo y luego **Implementar → Gestionar implementaciones → ✏️ → Versión: Nueva versión → Implementar**. Así la URL no cambia.
+
+## Compartir GilVault
+
+Cada persona usa **su propia** Google Sheet y su propio script, así que nadie ve los datos de nadie.
+
+- **No hace falta copiar el repositorio:** la otra persona puede usar la misma app publicada y seguir los pasos 1 a 5 con su cuenta de Google. En la propiedad `APP_URL` pone la dirección de la app que va a usar.
+- **Nunca compartas tu URL `/exec` ni tu token**, ni reenvíes el correo de `conectarTelefono`: con esos datos se pueden ver y modificar tus gastos.
+- El intérprete está ajustado a las notificaciones de **Intesa Sanpaolo**. Para otros bancos hay que añadir su formato en `interpretarNotificacion` (y una prueba en `tests/parser.test.js`).
+- MacroDroid solo existe en Android.
 
 ## Opciones extra (Apps Script → Configuración del proyecto → Propiedades del script)
 
