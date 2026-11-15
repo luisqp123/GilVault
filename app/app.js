@@ -53,7 +53,7 @@
     cursor: () => tono([1046], 0.04),
     ok: () => tono([784, 1175], 0.07),
     error: () => tono([196, 147], 0.12, 'sawtooth'),
-    tesoro: () => tono([523, 659, 784, 1046, 784, 1046], 0.09),
+    tesoro: () => tono([659, 784, 1046, 1318, 1175, 1318, 1568], 0.08),
     voz: () => tono([660 + Math.round(Math.random() * 180)], 0.025, 'triangle')
   };
 
@@ -124,13 +124,49 @@
       const d = await api('datos', { mes: st.mes });
       st.datos = d; st.offline = false; st.error = null;
       ls.set(claveCache(st.mes), d);
+      detectarNuevos(d);
     } catch (e) {
       const c = ls.get(claveCache(st.mes), null);
       st.datos = c; st.offline = true; st.error = e.message;
       if (c) toast('Sin conexión: ' + e.message, true);
     }
     render();
-    avisarReporteNuevo();
+    if (!avisarObjetosNuevos()) avisarReporteNuevo();
+  }
+
+  // Objetos que llegaron desde la última vez que abriste la app.
+  let nuevosPendientes = [];
+  function detectarNuevos(d) {
+    if (enDemo() || d.mes !== mesHoy()) return;
+    const clave = 'gv_vistos';
+    const vistos = ls.get(clave, null);
+    const ids = d.movimientos.map(m => m.id);
+    if (vistos) {
+      const set = new Set(vistos);
+      nuevosPendientes = nuevosPendientes.concat(d.movimientos.filter(m => !set.has(m.id) && !nuevosPendientes.some(x => x.id === m.id)));
+    }
+    ls.set(clave, [...new Set((vistos || []).concat(ids))].slice(-600));
+  }
+
+  function avisarObjetosNuevos() {
+    if (!nuevosPendientes.length || !$modal.hidden) return false;
+    const lista = nuevosPendientes.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    nuevosPendientes = [];
+    sfx.tesoro();
+    const uno = lista.length === 1;
+    $modal.innerHTML = `<div class="win" style="text-align:center">
+      <div class="cofre-anim" style="width:96px;margin:6px auto">${sp('cofre', 'xl', 'siempre')}</div>
+      <p class="px oro" style="line-height:1.8">✦ ¡${uno ? 'Obtuviste un objeto' : `Obtuviste ${lista.length} objetos`}! ✦</p>
+      <ul class="menu" style="text-align:left">${lista.slice(0, 5).map(m => `<li class="fila" style="padding:4px 0">${sp(m.categoria, '', 'siempre')}
+        <span class="grow" style="min-width:0;overflow-wrap:anywhere">${esc(m.lugar)}</span><span class="num oro">${euros(m.monto)}</span></li>`).join('')}</ul>
+      ${lista.length > 5 ? `<p class="dim">…y ${lista.length - 5} más</p>` : ''}
+      <div class="botones"><button class="btn oro" data-accion="ok">¡Bien!</button></div>
+    </div>`;
+    $modal.hidden = false;
+    $modal.onclick = e => {
+      if (e.target === $modal || e.target.closest('[data-accion]')) { cerrarModal(); avisarReporteNuevo(); }
+    };
+    return true;
   }
 
   // ---------------------------------------------------------------- navegación
@@ -147,7 +183,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v5</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v6</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -166,7 +202,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v5</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v6</div>`;
     montarSabio();
   }
 
@@ -414,6 +450,9 @@
       <section class="win">
         <h2 class="titulo">Opciones</h2>
         <label class="check"><input type="checkbox" id="opt-sonido" ${ls.get('gv_sonido', true) ? 'checked' : ''}> Sonidos 8-bit</label>
+        <p class="dim" style="font-size:18px;margin:10px 0 6px">Sonido de "objeto obtenido" para la notificación de MacroDroid:</p>
+        <div class="botones" style="margin-top:0"><a class="btn" href="sonidos/objeto.ogg" download="gilvault-objeto.ogg">Descargar sonido</a>
+          <button class="btn" type="button" data-accion="oir-sonido">▶ Escuchar</button></div>
         ${enDemo() ? `<div class="botones"><button class="btn" type="button" data-accion="reiniciar-demo">Reiniciar datos demo</button></div>` : ''}
       </section>`;
   }
@@ -631,6 +670,7 @@
     if (el.dataset.accion === 'desconectar') {
       ls.set('gv_url', ''); toast('Modo demo activado.'); st.datos = null; cargarDatos(); return;
     }
+    if (el.dataset.accion === 'oir-sonido') { try { new Audio('sonidos/objeto.ogg').play(); } catch (err) { } return; }
     if (el.dataset.accion === 'reintentar') { st.error = null; render(); cargarDatos(); return; }
     if (el.dataset.accion === 'reiniciar-demo') { Demo.reiniciar(); st.datos = null; cargarDatos(); toast('Datos demo reiniciados.'); }
   });
