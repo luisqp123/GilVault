@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v10</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v11</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v10</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v11</div>`;
     montarSabio();
     montarGato();
   }
@@ -656,12 +656,13 @@
     if (!$c) return;
     const d = new Date(), h = d.getHours() + d.getMinutes() / 60;
     let fondo, astro = 'sol', x, y, estrellas = false;
-    if (h >= 6 && h < 8) { fondo = 'linear-gradient(#6a8fd8, #ffc27a)'; x = 33; y = 40 - (h - 6) * 8; }
+    // La ventana ocupa ~14%–66% del alto de la escena; el gato tapa la parte baja.
+    if (h >= 6 && h < 8) { fondo = 'linear-gradient(#6a8fd8, #ffc27a)'; x = 33; y = 52 - (h - 6) * 7; }
     else if (h >= 8 && h < 17) {
       const t = (h - 8) / 9;                       // 0 → 1 a lo largo del día
-      fondo = 'linear-gradient(#5ab8f5, #d6f3ff)'; x = 32 + t * 28; y = 26 - Math.sin(t * Math.PI) * 18;
-    } else if (h >= 17 && h < 20) { fondo = 'linear-gradient(#6a3cc2, #ff8a5a)'; x = 58; y = 24 + (h - 17) * 6; }
-    else { fondo = 'linear-gradient(#060a24, #1c2a6a)'; astro = 'luna'; x = 38; y = 10; estrellas = true; }
+      fondo = 'linear-gradient(#5ab8f5, #d6f3ff)'; x = 32 + t * 28; y = 46 - Math.sin(t * Math.PI) * 28;
+    } else if (h >= 17 && h < 20) { fondo = 'linear-gradient(#6a3cc2, #ff8a5a)'; x = 58; y = 34 + (h - 17) * 6; }
+    else { fondo = 'linear-gradient(#060a24, #1c2a6a)'; astro = 'luna'; x = 40; y = 20; estrellas = true; }
     $c.style.background = fondo;
     $a.style.left = x + '%'; $a.style.top = y + '%';
     if ($a.dataset.f !== astro) { $a.dataset.f = astro; $a.innerHTML = Sprites.svg(astro); }
