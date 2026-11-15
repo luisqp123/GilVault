@@ -38,5 +38,9 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: app
+      # A veces GitHub tarda en registrar el paquete recién subido y el despliegue
+      # falla con "Fetching artifact metadata failed": una espera corta lo evita.
+      - name: Esperar a que el paquete esté disponible
+        run: sleep 15
       - id: deployment
         uses: actions/deploy-pages@v4

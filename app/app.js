@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v11</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v12</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v11</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v12</div>`;
     montarSabio();
     montarGato();
   }
@@ -270,7 +270,7 @@
     const opciones = [
       ['objetos', 'Objetos', ''],
       ['categorias', 'Categorías', ''],
-      ['reporte', 'Reporte', nuevos ? '<span class="badge">NUEVO</span>' : ''],
+      ['reporte', 'Reporte', nuevos ? '<span class="badge" title="Nuevo" aria-label="nuevo">!</span>' : ''],
       ['anadir', 'Añadir', ''],
       ['config', 'Config', '']
     ];
@@ -378,7 +378,7 @@
       ${meses.map(m => `<li><button class="item" data-ir="reporte/${m}">
         ${sp(reps[m] ? 'Suscripciones' : 'gil')}
         <span class="grow">${esc(nombreMes(m))}<span class="sub">${m === mesHoy() ? 'En curso' : reps[m] ? 'Cerrado' : 'Calculado al vuelo'}</span></span>
-        ${reps[m] && !reps[m].visto ? '<span class="badge">NUEVO</span>' : ''}
+        ${reps[m] && !reps[m].visto ? '<span class="badge" title="Nuevo" aria-label="nuevo">!</span>' : ''}
       </button></li>`).join('')}
     </ul></div>`;
   }
