@@ -525,7 +525,8 @@ textarea { min-height: 80px; resize: vertical; }
 .heroe-anim:focus { outline: none; }
 
 /* ---------- Aventurero en idle (SVG del usuario) ---------- */
-.heroe-idle { display: block; image-rendering: pixelated; pointer-events: none; }
+.heroe-idle { display: block; aspect-ratio: 100 / 173; pointer-events: none;
+  background: url(heroe/idle_anim.svg?v=19) no-repeat 0 0 / 300% 100%; }
 .bs-anillo .heroe-idle { position: absolute; left: 50%; top: 50%; height: 132px; width: auto; transform: translate(-50%, -50%); }
 .mochila-heroe .heroe-idle { position: absolute; left: 50%; bottom: 8px; height: 150px; width: auto; transform: translateX(-50%); }
 @media (max-width: 380px) { .bs-anillo .heroe-idle { height: 108px; } }

@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v18</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v19</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,11 +223,12 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig, mochila: vMochila };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v18</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v19</div>`;
     montarSabio();
     montarGato();
     montarAventura();
     montarHeroes();
+    montarIdle();
   }
 
   function avisos() {
@@ -435,7 +436,7 @@
         </div>
         <div class="bs-anillo">
           ${puntos}
-          <img class="heroe-idle" src="heroe/idle.svg?v=18" alt="Tu aventurero">
+          <span class="heroe-idle" data-idle role="img" aria-label="Tu aventurero"></span>
           ${iconos}
         </div>
       </div>
@@ -468,7 +469,7 @@
     const lista = inv.objetos.slice().reverse();
     return cabecera('Mochila') + `
       <section class="win"><h2 class="titulo">Equipo</h2>
-        <div class="mochila-heroe"><img class="heroe-idle" src="heroe/idle.svg?v=18" alt="Tu aventurero"></div>
+        <div class="mochila-heroe"><span class="heroe-idle" data-idle role="img" aria-label="Tu aventurero"></span></div>
         <div class="ranuras">${ranuras}</div></section>
       <section class="win"><h2 class="titulo">Objetos (${lista.length})</h2>
         ${lista.length ? `<ul class="menu">${lista.map(o => filaObjeto(o, puestos.has(o.id))).join('')}</ul>`
@@ -698,6 +699,25 @@
       };
       el.onclick = lanzar;
       el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lanzar(); } };
+    });
+  }
+
+  // Idle de 3 cuadros (0 original, 1 respiración, 2 parpadeo) sobre heroe/idle_anim.svg.
+  // Pasos [cuadro, milisegundos]: respira despacio y parpadea de vez en cuando.
+  const PASOS_IDLE = [[0, 800], [1, 800], [0, 800], [1, 800], [0, 500], [2, 150], [0, 650], [1, 800]];
+  function montarIdle() {
+    document.querySelectorAll('[data-idle]').forEach(el => {
+      clearTimeout(el._t);
+      let i = 0;
+      const paso = () => {
+        if (!document.body.contains(el)) return;
+        const [c, ms] = PASOS_IDLE[i];
+        el.style.backgroundPosition = `${c * 50}% 0`;
+        if (menosMovimiento()) return;
+        i = (i + 1) % PASOS_IDLE.length;
+        el._t = setTimeout(paso, ms);
+      };
+      paso();
     });
   }
 

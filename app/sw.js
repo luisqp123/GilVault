@@ -1,6 +1,6 @@
 // Service worker: la app abre sin conexión (los datos vienen de la última copia guardada).
-const VERSION = 'gilvault-v18';
-const ARCHIVOS = ['./', 'index.html', 'style.css?v=18', 'app.js?v=18', 'sprites.js?v=18', 'demo.js?v=18', 'gato.js?v=18', 'aventura.js?v=18', 'manifest.webmanifest', 'heroe/idle.svg?v=18', 'heroe/idle.png?v=18', 'heroe/caminata.png?v=18', 'heroe/vuelta.png?v=18', 'heroe/cansado.png?v=18', 'heroe/fogata.png?v=18', 'heroe/hechizo.png?v=18',
+const VERSION = 'gilvault-v19';
+const ARCHIVOS = ['./', 'index.html', 'style.css?v=19', 'app.js?v=19', 'sprites.js?v=19', 'demo.js?v=19', 'gato.js?v=19', 'aventura.js?v=19', 'manifest.webmanifest', 'heroe/idle_anim.svg?v=19', 'heroe/idle.png?v=19', 'heroe/caminata.png?v=19', 'heroe/vuelta.png?v=19', 'heroe/cansado.png?v=19', 'heroe/fogata.png?v=19', 'heroe/hechizo.png?v=19',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
