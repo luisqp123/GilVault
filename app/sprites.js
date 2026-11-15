@@ -18,7 +18,8 @@
     t: '#1f9a8f', T: '#12655e', // verde azulado
     a: '#2d4f96', A: '#1b2f60', u: '#4a78cf', // azul del sabio (sombrero y túnica)
     h: '#4b4b63', q: '#f2a0b0', // rayas y nariz del gato
-    x: '#5a2a6a', X: '#33133d' // mantel de la mesa de tarot
+    x: '#5a2a6a', X: '#33133d', // mantel de la mesa de tarot
+    z: '#1f1b3d', Z: '#29244f' // pared de ladrillo de la tienda
   };
 
   const S = {
@@ -633,6 +634,92 @@
  ]
 });
   // --- fin gato ---
+  // --- Generado por tools/tienda_grid.py (tienda mágica, sol y luna) ---
+  Object.assign(S, {
+ "tienda": [
+  "ZZZVZzZVZZZzVAZZZzZZZZZzZZZZZzZZZZZzZZZZZzAZVZZzZVZZZVZZ",
+  "zzzzvzzzvzzzzvzzzzzzzzzzzzzzzzzzzzzzzzzzzzAzzvzzzzvzzzvz",
+  "zzzvzzzvzzzzvAzzzzzzzzzzAAAAAAAAzzzzzzzzzzAzvzzzzvzzzvzz",
+  "zzzzVzzzzzzzzVzzzzzzzzAAuuuuuuuuAAzzzzzzzzAzzVzzzzVzzzVz",
+  "zzzvZZZZzZZZvAzZZZZZzAuu...aa...uuAZZZzZZZAZvZZZZZzZZvZZ",
+  "zzzzvzzzzzzzzvzzzzzzAu.....aa.....uAzzzzzzAzzvzzzzzzzzvz",
+  "zzzzzznzzzzzVAzzzzzAu......aa......uAzzzzzAzVzzzznzzzVzz",
+  "zznzzzezzzzzzvzzzzAu.......aa.......uAzzzzAzzzzzzezzznvz",
+  "ZZeZZwvvZnnnnAZZZAu........aa........uAZZzAnnnnzwrrZZvZZ",
+  "zwppzvvvzCCCCAzzzAu........aa........uAzzzAvvvvzrrrzwccz",
+  "zpppzvvvzCwCCAzzAu.........aa.........uAzzAvwvvzrrrzcccz",
+  "zpppzvvvzCCCCAzzAu.........aa.........uAzzAvvvvzrrrzcccz",
+  "zpppZvvvzCCCCAzZAu.........aa.........uAZZAvvvvZrrrZcccZ",
+  "uuuuuuuuuuuuuAzzAu.........aa.........uAzzAuuuuuuuuuuuuu",
+  "AAAAAAAAAAAAAAzzAu.........aa.........uAzzAAAAAAAAAAAAAA",
+  "zzzzzzzzzzzzzAzzAu.........aa.........uAzzAzzzzzzzzzzzzz",
+  "ZZZZZzZZZZZzZAZZAu.........aa.........uAZzAZZZZzZZZZZzZZ",
+  "zzzzzzzzzzzzzAzzAu.........aa.........uAzzAzzzzzzzzzzzzz",
+  "zzzzzzzzzzzzzAzzAuaaaaaaaaaaaaaaaaaaaauAzzAzzzzzzzzzzzzz",
+  "zrrCCzzzzznzzAzzAu.........aa.........uAzzAznzzvvzzCCzzz",
+  "zyryCggZzZeZZAzZAu.........aa.........uAZZAZeZZyvrryCZZZ",
+  "zrrCCygzzwrrzAzzAu.........aa.........uAzzAwggzvvyrCCzzz",
+  "zrrCCggzzrrrzAzzAu.........aa.........uAzzAgggzvvrrCCzzz",
+  "zrrCCggzzrrrzAzzAu.........aa.........uAzzAgggzvvrrCCzzz",
+  "ZrrCCggZZrrrZAZZAu.........aa.........uAZzAgggZvvrrCCzZZ",
+  "uuuuuuuuuuuuuAzzAu.........aa.........uAzzAuuuuuuuuuuuuu",
+  "AAAAAAAAAAAAAAzzAu.........aa......v..uAzzAAAAAAAAAAAAAA",
+  "zzzzzzzzzzzzzAzzAu.........aa.....V...uAzzAzzzzzzzzzzzzz",
+  "zzzZZZZZzZZZZAzZAu.........aa....vvvv.uAZZAZzZZZZZzZZZZZ",
+  "zzzzzzzzzzzzzAzzAu.........aa....OOOO.uAzzAzzzzzzzzzzzzz",
+  "zzzzzzznzzzzzAzzAu.........aa....OOOO.uAzzAznzzzzzzzzzzz",
+  "zzzzzzzezzzzzAzzAu.........aa....OOOO.uAzzAzezzzzzzzzzzz",
+  "ZnnnnzwccZZnZAZuuuuuuuuuuuuuuuuuuuuuuuuuuzAwppZnnnnZZnZZ",
+  "zOOOOzccczzezAzAAAAAAAAAAAAAAAAAAAAAAAAAAzApppzggggzzezz",
+  "zOwOOzccczwppAzzzzzzzzzzzzzzzzzzzzzzzzzzzzApppzgwggzwvvz",
+  "zOOOOzccczpppAzzzzzzzzzzzzzzzzzzzzzzzzzzzzApppzggggzvvvz",
+  "zOOOOZcccZpppAzZZZZZzZZZZZzZZZZZzZZZZZzZZZApppZggggZvvvZ",
+  "uuuuuuuuuuuuuAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAuuuuuuuuuuuuu",
+  "AAAAAAAAAAAAAAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAAAAAAAAAAAAAA",
+  "zzzzzzzzzzzzzAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAzzzzzzzzzzzzz",
+  "ZZZZZzZZZZZzZAZZZzZZZZZzZZZZZzZZZZZzZZZZZzAZZZZzZZZZZzZZ",
+  "zzzzzzzzzzzzzAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAzzzzzzzzzzzzz",
+  "zzzzzzzzzzzzzAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAzzzzzzzzzznzz",
+  "zznzzzzzzzppzAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAzzzzzznzzzezz",
+  "zzeZZnnnnZypZAzZZZZZzZZZZZzZZZZZzZZZZZzZZZAnnnnZZezZwrrZ",
+  "zwvvzrrrrzppzAzzzzzzzzzzzzzzzzzzzzzzzzzzzzACCCCzwOOzrrrz",
+  "zvvvzrwrrzppzAzzzzzzzzzzzzzzzzzzzzzzzzzzzzACwCCzOOOzrrrz",
+  "zvvvzrrrrzppzAzzzzzzzzzzzzzzzzzzzzzzzzzzzzACCCCzOOOzrrrz",
+  "ZvvvZrrrrZppZAZZZzZZZZZzZZZZZzZZZZZzZZZZZzACCCCzOOOZrrrZ",
+  "uuuuuuuuuuuuuAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAuuuuuuuuuuuuu",
+  "AAAAAAAAAAAAAAzzzzzzzzzzzzzzzzzzzzzzzzzzzzAAAAAAAAAAAAAA",
+  "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+  "pppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+ ],
+ "sol": [
+  "...gg...",
+  ".ggyygg.",
+  ".gwwyyg.",
+  "gywyyyyg",
+  "gyyyyyyg",
+  ".gyyyyg.",
+  ".ggyygg.",
+  "...gg..."
+ ],
+ "luna": [
+  "...m....",
+  ".mm.....",
+  ".mm.....",
+  "mmm.....",
+  "mmm.....",
+  ".msm....",
+  ".mmsmmm.",
+  "...mm..."
+ ]
+});
+  // --- fin tienda ---
 
   // --- Cuadros derivados para animaciones ---
   const CATS = ['Comida', 'Salud', 'Transporte', 'Tiempo libre', 'Hogar/Servicios', 'Suscripciones', 'Otros'];

@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v8</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v9</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v8</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v9</div>`;
     montarSabio();
     montarGato();
   }
@@ -297,7 +297,13 @@
           ${opciones.map(([id, txt, extra], i) => `<li><button class="item px ${i === st.menuSel ? 'sel' : ''}" data-menu="${i}" data-ir="${id}">${txt}${extra}</button></li>`).join('')}
         </ul>
         <button class="gato-btn" id="gato" type="button" aria-label="Maese Ronroneo, el gato del mercado: toca para que te lea una carta">
-          <span class="sprite gato-sprite" id="gato-sprite" data-anim="gato_1" data-modo="siempre">${Sprites.svg('gato_1')}</span>
+          <span class="tienda" aria-hidden="true">
+            <span class="cielo" id="cielo"></span>
+            <span class="astro" id="astro"></span>
+            <span class="estrellas-cielo" id="estrellas">${'<i></i>'.repeat(7)}</span>
+            <span class="escena">${Sprites.svg('tienda')}</span>
+            <span class="sprite gato-sprite" id="gato-sprite" data-anim="gato_1" data-modo="siempre">${Sprites.svg('gato_1')}</span>
+          </span>
           <span class="px toca">✦ Tócame ✦</span>
         </button>
       </nav>
@@ -638,9 +644,29 @@
 
   const vozGato = () => tono([360 + Math.round(Math.random() * 120)], 0.03, 'triangle');
 
+  // Cielo de la ventana según la hora: amanecer, día, atardecer o noche.
+  function pintarCielo() {
+    const $c = document.getElementById('cielo'), $a = document.getElementById('astro'), $e = document.getElementById('estrellas');
+    if (!$c) return;
+    const d = new Date(), h = d.getHours() + d.getMinutes() / 60;
+    let fondo, astro = 'sol', x, y, estrellas = false;
+    if (h >= 6 && h < 8) { fondo = 'linear-gradient(#6a8fd8, #ffc27a)'; x = 33; y = 40 - (h - 6) * 8; }
+    else if (h >= 8 && h < 17) {
+      const t = (h - 8) / 9;                       // 0 → 1 a lo largo del día
+      fondo = 'linear-gradient(#5ab8f5, #d6f3ff)'; x = 32 + t * 28; y = 26 - Math.sin(t * Math.PI) * 18;
+    } else if (h >= 17 && h < 20) { fondo = 'linear-gradient(#6a3cc2, #ff8a5a)'; x = 58; y = 24 + (h - 17) * 6; }
+    else { fondo = 'linear-gradient(#060a24, #1c2a6a)'; astro = 'luna'; x = 38; y = 10; estrellas = true; }
+    $c.style.background = fondo;
+    $a.style.left = x + '%'; $a.style.top = y + '%';
+    if ($a.dataset.f !== astro) { $a.dataset.f = astro; $a.innerHTML = Sprites.svg(astro); }
+    $e.style.display = estrellas ? '' : 'none';
+  }
+  setInterval(pintarCielo, 60000);
+
   function montarGato() {
     const $gato = document.getElementById('gato');
     if (!$gato) return;
+    pintarCielo();
     $gato.onclick = () => { sfx.cursor(); leerCarta(); };
     // Saludo: una vez por sesión, al entrar en el inicio.
     if (!st.gato) {
