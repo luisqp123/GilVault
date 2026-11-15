@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v14</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v15</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig, mochila: vMochila };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v14</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v15</div>`;
     montarSabio();
     montarGato();
     montarAventura();

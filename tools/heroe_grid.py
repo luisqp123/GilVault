@@ -92,50 +92,39 @@ def heroe(estado='normal', respira=False):
     for y in range(6 + hy, 26 + hy):                                   # sombra del lado derecho
         for x in range(33 + hx, 38 + hx):
             if g[y][x] == 'f': p(x, y, 'F')
-    # pelo rizado: casquete y parte de atrás
+    # pelo rizado: casquete y parte de atrás (textura suave)
     elipse(26 + hx, 8 + hy, 10, 6.5, 'j')
     r(17 + hx, 8 + hy, 21 + hx, 19 + hy, 'j')
-    for y in range(3 + hy, 19 + hy):                                   # textura de rizos
-        for x in range(16 + hx, 37 + hx):
-            if g[y][x] == 'j' and (x * 3 + y * 5) % 7 == 0: p(x, y, 'J')
+    for (x, y) in [(20, 4), (25, 3), (30, 4), (18, 10), (23, 6), (33, 7), (19, 15)]: p(x + hx, y + hy, 'J')
     r(22 + hx, 11 + hy, 35 + hx, 12 + hy, 'f')                         # frente despejada
-    elipse(14 + hx, 5 + hy, 4, 4, 'j'); p(13 + hx, 4 + hy, 'J'); p(15 + hx, 6 + hy, 'J')   # moño
+    elipse(14 + hx, 5 + hy, 4, 4, 'j'); p(13 + hx, 4 + hy, 'J')        # moño
     r(17 + hx, 6 + hy, 18 + hx, 7 + hy, 'r')                           # gomita roja
-    # oreja
-    r(20 + hx, 15 + hy, 21 + hx, 18 + hy, 'f'); p(20 + hx, 16 + hy, 'F'); p(21 + hx, 17 + hy, 'F')
-    # cejas
-    r(24 + hx, 13 + hy, 27 + hx, 13 + hy, 'j'); r(30 + hx, 13 + hy, 33 + hx, 13 + hy, 'j')
-    # lentes redondos (montura gris oscuro) con patilla hasta la oreja
+    # oreja (simple)
+    r(20 + hx, 15 + hy, 21 + hx, 18 + hy, 'f')
+    # lentes: solo la montura superior y los lados, finos
     for (x0, x1) in ((23, 28), (29, 34)):
-        for x in range(x0, x1 + 1):
-            p(x + hx, 14 + hy, 'h'); p(x + hx, 18 + hy, 'h')
-        for y in range(15, 18):
-            p(x0 + hx, y + hy, 'h'); p(x1 + hx, y + hy, 'h')
-    r(21 + hx, 15 + hy, 22 + hx, 15 + hy, 'h')
-    # ojos
+        r(x0 + hx, 14 + hy, x1 + hx, 14 + hy, 'h')
+        r(x0 + hx, 15 + hy, x0 + hx, 16 + hy, 'h'); r(x1 + hx, 15 + hy, x1 + hx, 16 + hy, 'h')
+    r(21 + hx, 14 + hy, 22 + hx, 14 + hy, 'h')
+    # ojos: dos píxeles
     if estado == 'agotado':
-        r(25 + hx, 17 + hy, 26 + hx, 17 + hy, 'F'); r(31 + hx, 17 + hy, 32 + hx, 17 + hy, 'F')
-    elif estado == 'cansado':
         r(25 + hx, 16 + hy, 26 + hx, 16 + hy, 'F'); r(31 + hx, 16 + hy, 32 + hx, 16 + hy, 'F')
-        r(25 + hx, 17 + hy, 26 + hx, 17 + hy, 'n'); r(31 + hx, 17 + hy, 32 + hx, 17 + hy, 'n')
+    elif estado == 'cansado':
+        r(25 + hx, 16 + hy, 26 + hx, 16 + hy, 'n'); r(31 + hx, 16 + hy, 32 + hx, 16 + hy, 'n')
     else:
-        r(25 + hx, 16 + hy, 26 + hx, 17 + hy, 'n'); r(31 + hx, 16 + hy, 32 + hx, 17 + hy, 'n')
-        p(25 + hx, 16 + hy, 'w'); p(31 + hx, 16 + hy, 'w')
-    r(32 + hx, 19 + hy, 33 + hx, 20 + hy, 'F')                         # nariz
-    # barba: bigote y mandíbula, con canas
-    r(27 + hx, 21 + hy, 35 + hx, 21 + hy, 'J')
-    for y in range(22, 28):
-        x0 = 20 + (y - 22) // 2; x1 = 36 - (y - 22) // 2
+        r(26 + hx, 15 + hy, 26 + hx, 16 + hy, 'n'); r(31 + hx, 15 + hy, 31 + hx, 16 + hy, 'n')
+    # barba: forma lisa en la mandíbula, con dos canas
+    for y in range(21, 28):
+        x0 = 21 + (y - 21) // 2; x1 = 36 - (y - 21) // 2
         r(x0 + hx, y + hy, x1 + hx, y + hy, 'J')
-    r(22 + hx, 26 + hy, 34 + hx, 27 + hy, 'j')
-    r(21 + hx, 19 + hy, 22 + hx, 22 + hy, 'J')                         # patilla
-    for (x, y) in [(24, 23), (30, 25), (34, 22), (27, 26), (22, 24), (32, 24), (26, 22)]: p(x + hx, y + hy, 'M')
+    p(25 + hx, 25 + hy, 'M'); p(32 + hx, 23 + hy, 'M')
+    # boca
     if estado == 'energia':
-        r(28 + hx, 23 + hy, 33 + hx, 23 + hy, 'w'); r(29 + hx, 24 + hy, 32 + hx, 24 + hy, 'R')
+        r(28 + hx, 23 + hy, 32 + hx, 23 + hy, 'w')
     elif estado == 'agotado':
-        r(30 + hx, 23 + hy, 31 + hx, 23 + hy, 'R')
+        r(29 + hx, 23 + hy, 30 + hx, 23 + hy, 'f')
     else:
-        r(29 + hx, 23 + hy, 32 + hx, 23 + hy, 'R')
+        r(28 + hx, 23 + hy, 31 + hx, 23 + hy, 'f')
     contorno(g)
     # gotas de sudor (sin contorno)
     if estado in ('cansado', 'agotado'):

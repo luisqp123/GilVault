@@ -1,6 +1,6 @@
 // Service worker: la app abre sin conexión (los datos vienen de la última copia guardada).
-const VERSION = 'gilvault-v14';
-const ARCHIVOS = ['./', 'index.html', 'style.css?v=14', 'app.js?v=14', 'sprites.js?v=14', 'demo.js?v=14', 'gato.js?v=14', 'aventura.js?v=14', 'manifest.webmanifest',
+const VERSION = 'gilvault-v15';
+const ARCHIVOS = ['./', 'index.html', 'style.css?v=15', 'app.js?v=15', 'sprites.js?v=15', 'demo.js?v=15', 'gato.js?v=15', 'aventura.js?v=15', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
