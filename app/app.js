@@ -31,6 +31,27 @@
   const aLocalInput = iso => { const d = new Date(iso); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 
   // Cursor de manita como variable CSS.
+  // ---------------------------------------------------------------- color de ventanas (4 esquinas)
+  const ESQ = ['tl', 'tr', 'bl', 'br'];
+  const PALETAS = {
+    'Clásico': ['#2c44c8', '#2c44c8', '#0b1450', '#0b1450'],
+    'Cristal': ['#4a6ae8', '#1c2c94', '#1c2c94', '#060b34'],
+    'Medianoche': ['#3a3a58', '#18182e', '#18182e', '#05050f'],
+    'Esmeralda': ['#23a06a', '#0f5a3a', '#0f5a3a', '#04241a'],
+    'Carmesí': ['#c03244', '#6a1020', '#6a1020', '#2a0510'],
+    'Ámbar': ['#c8901e', '#7a5010', '#7a5010', '#2a1a05'],
+    'Violeta': ['#8a48d2', '#3a1a7a', '#3a1a7a', '#140830'],
+    'Cuatro reinos': ['#b83030', '#2c44c8', '#2f8a3c', '#a88a10']
+  };
+  function aplicarColores(c) {
+    const r = document.documentElement.style;
+    ESQ.forEach((k, i) => r.setProperty('--c-' + k, c[i]));
+    const meta = document.querySelector('meta[name=theme-color]');
+    if (meta) meta.content = c[2];
+  }
+  const coloresGuardados = () => ls.get('gv_colores', PALETAS['Clásico']);
+  aplicarColores(coloresGuardados());
+
   document.documentElement.style.setProperty('--mano', `url("data:image/svg+xml,${encodeURIComponent(Sprites.svg('mano'))}")`);
 
   // ---------------------------------------------------------------- sonido 8-bit
@@ -183,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v6</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v7</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -202,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v6</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v7</div>`;
     montarSabio();
   }
 
@@ -448,6 +469,16 @@
         <div id="res-probar"></div>
       </form>
       <section class="win">
+        <h2 class="titulo">Color de ventanas</h2>
+        <p class="dim" style="font-size:18px;margin:0 0 10px">Elige un color para cada esquina; las ventanas mezclan los cuatro.</p>
+        <div class="esquinas">
+          ${ESQ.map((k, i) => `<label class="${k}"><input type="color" data-esquina="${i}" value="${coloresGuardados()[i]}" aria-label="Esquina ${['superior izquierda', 'superior derecha', 'inferior izquierda', 'inferior derecha'][i]}">${['↖', '↗', '↙', '↘'][i]}</label>`).join('')}
+          <div class="win muestra"><span class="px">Vista<br>previa</span></div>
+        </div>
+        <div class="paletas">${Object.entries(PALETAS).map(([n, c]) => `<button type="button" class="paleta" title="${esc(n)}" aria-label="Paleta ${esc(n)}" data-paleta="${esc(n)}"
+          style="background:linear-gradient(to right, ${c[2]}, ${c[3]})"><span style="display:block;width:100%;height:100%;border-radius:3px;background:linear-gradient(to right, ${c[0]}, ${c[1]});-webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent)"></span></button>`).join('')}</div>
+      </section>
+      <section class="win">
         <h2 class="titulo">Opciones</h2>
         <label class="check"><input type="checkbox" id="opt-sonido" ${ls.get('gv_sonido', true) ? 'checked' : ''}> Sonidos 8-bit</label>
         <p class="dim" style="font-size:18px;margin:10px 0 6px">Sonido de "objeto obtenido" para la notificación de MacroDroid:</p>
@@ -670,9 +701,21 @@
     if (el.dataset.accion === 'desconectar') {
       ls.set('gv_url', ''); toast('Modo demo activado.'); st.datos = null; cargarDatos(); return;
     }
+    if (el.dataset.paleta) {
+      const c = PALETAS[el.dataset.paleta]; sfx.ok(); aplicarColores(c); ls.set('gv_colores', c);
+      document.querySelectorAll('[data-esquina]').forEach(i => { i.value = c[Number(i.dataset.esquina)]; });
+      return;
+    }
     if (el.dataset.accion === 'oir-sonido') { try { new Audio('sonidos/objeto.ogg').play(); } catch (err) { } return; }
     if (el.dataset.accion === 'reintentar') { st.error = null; render(); cargarDatos(); return; }
     if (el.dataset.accion === 'reiniciar-demo') { Demo.reiniciar(); st.datos = null; cargarDatos(); toast('Datos demo reiniciados.'); }
+  });
+
+  $app.addEventListener('input', e => {
+    if (e.target.dataset.esquina === undefined) return;
+    const c = coloresGuardados().slice();
+    c[Number(e.target.dataset.esquina)] = e.target.value;
+    aplicarColores(c); ls.set('gv_colores', c);
   });
 
   $app.addEventListener('change', e => {
