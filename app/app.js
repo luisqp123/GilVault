@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v17</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v18</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,7 +223,7 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig, mochila: vMochila };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v17</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v18</div>`;
     montarSabio();
     montarGato();
     montarAventura();
@@ -435,7 +435,7 @@
         </div>
         <div class="bs-anillo">
           ${puntos}
-          <span class="heroe-anim" data-heroe="${e.estado}" role="button" tabindex="0" aria-label="Toca a tu aventurero para lanzar un hechizo"></span>
+          <img class="heroe-idle" src="heroe/idle.svg?v=18" alt="Tu aventurero">
           ${iconos}
         </div>
       </div>
@@ -468,7 +468,7 @@
     const lista = inv.objetos.slice().reverse();
     return cabecera('Mochila') + `
       <section class="win"><h2 class="titulo">Equipo</h2>
-        <div class="mochila-heroe"><span class="heroe-anim" data-heroe="vuelta"></span></div>
+        <div class="mochila-heroe"><img class="heroe-idle" src="heroe/idle.svg?v=18" alt="Tu aventurero"></div>
         <div class="ranuras">${ranuras}</div></section>
       <section class="win"><h2 class="titulo">Objetos (${lista.length})</h2>
         ${lista.length ? `<ul class="menu">${lista.map(o => filaObjeto(o, puestos.has(o.id))).join('')}</ul>`

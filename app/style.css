@@ -523,3 +523,9 @@ textarea { min-height: 80px; resize: vertical; }
 /* El rayo del hechizo sale del cuadro: se recorta sin desplazar la ventana (clip no permite scroll). */
 .estado-bs, .mochila-heroe { overflow: clip; }
 .heroe-anim:focus { outline: none; }
+
+/* ---------- Aventurero en idle (SVG del usuario) ---------- */
+.heroe-idle { display: block; image-rendering: pixelated; pointer-events: none; }
+.bs-anillo .heroe-idle { position: absolute; left: 50%; top: 50%; height: 132px; width: auto; transform: translate(-50%, -50%); }
+.mochila-heroe .heroe-idle { position: absolute; left: 50%; bottom: 8px; height: 150px; width: auto; transform: translateX(-50%); }
+@media (max-width: 380px) { .bs-anillo .heroe-idle { height: 108px; } }
