@@ -204,7 +204,7 @@
     const { vista, arg } = ruta();
     if (!st.datos && vista === 'config') {
       // Config debe abrirse siempre, aunque no haya datos (para poder arreglar la conexión).
-      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v16</div>`;
+      $app.innerHTML = avisos() + vConfig() + `<div class="pie">GILVAULT v17</div>`;
       return;
     }
     if (!st.datos && st.error) {
@@ -223,10 +223,11 @@
       return;
     }
     const vistas = { inicio: vInicio, objetos: vObjetos, categorias: vCategorias, reporte: arg ? () => vReporte(arg) : vReportes, anadir: vAnadir, config: vConfig, mochila: vMochila };
-    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v16</div>`;
+    $app.innerHTML = avisos() + (vistas[vista] || vInicio)() + `<div class="pie">GILVAULT v17</div>`;
     montarSabio();
     montarGato();
     montarAventura();
+    montarHeroes();
   }
 
   function avisos() {
@@ -434,8 +435,7 @@
         </div>
         <div class="bs-anillo">
           ${puntos}
-          <span class="sprite heroe-sprite" data-anim="heroe_${e.estado}" data-modo="siempre">${Sprites.svg('heroe_' + e.estado + '_1')}</span>
-          ${e.estado === 'energia' ? `<span class="aura" aria-hidden="true">${'<i></i>'.repeat(6)}</span>` : ''}
+          <span class="heroe-anim" data-heroe="${e.estado}" role="button" tabindex="0" aria-label="Toca a tu aventurero para lanzar un hechizo"></span>
           ${iconos}
         </div>
       </div>
@@ -467,7 +467,9 @@
     }).join('');
     const lista = inv.objetos.slice().reverse();
     return cabecera('Mochila') + `
-      <section class="win"><h2 class="titulo">Equipo</h2><div class="ranuras">${ranuras}</div></section>
+      <section class="win"><h2 class="titulo">Equipo</h2>
+        <div class="mochila-heroe"><span class="heroe-anim" data-heroe="vuelta"></span></div>
+        <div class="ranuras">${ranuras}</div></section>
       <section class="win"><h2 class="titulo">Objetos (${lista.length})</h2>
         ${lista.length ? `<ul class="menu">${lista.map(o => filaObjeto(o, puestos.has(o.id))).join('')}</ul>`
           : '<div class="vacio">Tu mochila está vacía. Cada mes encontrarás un objeto al entrar en Reporte.</div>'}
@@ -640,6 +642,64 @@
       if (el.dataset.f !== n) { el.dataset.f = n; el.innerHTML = svgDe(n); }
     });
   }, 80);
+
+  // ---------------------------------------------------------------- el aventurero animado
+  // Tiras de cuadros extraídas de arte/adventurero_sprite_sheet.svg con tools/extraer_heroe.py.
+  const HEROE = {"idle":{"cuadros":7,"ancho":40,"alto":51,"pie":0.531},"caminata":{"cuadros":8,"ancho":46,"alto":51,"pie":0.551},"vuelta":{"cuadros":8,"ancho":45,"alto":53,"pie":0.525},"cansado":{"cuadros":5,"ancho":68,"alto":49,"pie":0.487},"fogata":{"cuadros":8,"ancho":64,"alto":41,"pie":0.503},"hechizo":{"cuadros":8,"ancho":177,"alto":49,"pie":0.214}};
+  const ANIM_HEROE = {
+    energia: { tira: 'caminata', seq: [0, 1, 2, 3, 4, 5, 6, 7], fps: 10, bucle: 0 },
+    normal: { tira: 'idle', seq: [0, 1, 2, 3, 4, 5, 6], fps: 6, bucle: 0 },
+    cansado: { tira: 'fogata', seq: [0, 1, 2, 3, 4, 5, 6, 7], fps: 5, bucle: 0 },
+    agotado: { tira: 'cansado', seq: [0, 1, 2, 3, 4, 4, 4, 4], fps: 3, bucle: 4 },   // se queda dormido
+    vuelta: { tira: 'vuelta', seq: [0, 1, 2, 3, 4, 5, 6, 7], fps: 5, bucle: 0 },
+    hechizo: { tira: 'hechizo', seq: [0, 1, 2, 3, 4, 5, 6, 7, 7], fps: 9, bucle: -1 }   // una vez
+  };
+  const ESCALA_HEROE = 3;
+  let relojesHeroe = [];
+
+  function mostrarTira(el, nombre) {
+    const m = HEROE[nombre], E = ESCALA_HEROE, w = m.ancho * E;
+    el.style.width = w + 'px'; el.style.height = m.alto * E + 'px';
+    el.style.backgroundImage = `url(heroe/${nombre}.png?v=17)`;
+    el.style.backgroundSize = `${m.cuadros * w}px ${m.alto * E}px`;
+    el.style.left = `calc(50% - ${Math.round(m.pie * w)}px)`;   // los pies quedan en el centro
+  }
+
+  function animarHeroe(el, clave, alTerminar) {
+    clearInterval(el._reloj);
+    const a = ANIM_HEROE[clave], w = HEROE[a.tira].ancho * ESCALA_HEROE;
+    mostrarTira(el, a.tira);
+    let i = 0;
+    const pinta = () => { el.style.backgroundPosition = `${-a.seq[i] * w}px 0`; };
+    pinta();
+    if (menosMovimiento()) { if (alTerminar) alTerminar(); return; }
+    el._reloj = setInterval(() => {
+      if (!document.body.contains(el)) { clearInterval(el._reloj); return; }
+      i++;
+      if (i >= a.seq.length) {
+        if (a.bucle < 0) { clearInterval(el._reloj); if (alTerminar) alTerminar(); return; }
+        i = a.bucle;
+      }
+      pinta();
+    }, 1000 / a.fps);
+    relojesHeroe.push(el._reloj);
+  }
+
+  function montarHeroes() {
+    relojesHeroe.forEach(clearInterval); relojesHeroe = [];
+    document.querySelectorAll('[data-heroe]').forEach(el => {
+      const clave = el.dataset.heroe;
+      animarHeroe(el, clave);
+      if (clave === 'vuelta') return;
+      const lanzar = () => {
+        if (el._hechizo) return;
+        el._hechizo = true; sfx.tesoro();
+        animarHeroe(el, 'hechizo', () => { el._hechizo = false; animarHeroe(el, clave); });
+      };
+      el.onclick = lanzar;
+      el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lanzar(); } };
+    });
+  }
 
   // ---------------------------------------------------------------- el Sabio Ábaco
   function mensajesSabio(mes, d, cerrado) {

@@ -513,3 +513,13 @@ textarea { min-height: 80px; resize: vertical; }
   .bs-anillo { width: 146px; height: 146px; }
   .bs-anillo .heroe-sprite { width: 84px; height: 122px; }
 }
+
+/* ---------- Aventurero animado (tiras de cuadros del arte del usuario) ---------- */
+.heroe-anim { position: absolute; bottom: 10px; display: block; background-repeat: no-repeat;
+  image-rendering: pixelated; cursor: pointer; z-index: 1; }
+.bs-anillo .heroe-anim { bottom: 14px; }
+.mochila-heroe { position: relative; height: 170px; margin-bottom: 10px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 85%, rgba(0, 0, 0, .35) 0 30%, transparent 31%); }
+/* El rayo del hechizo sale del cuadro: se recorta sin desplazar la ventana (clip no permite scroll). */
+.estado-bs, .mochila-heroe { overflow: clip; }
+.heroe-anim:focus { outline: none; }

@@ -1,0 +1,38 @@
+{
+ "idle": {
+  "cuadros": 7,
+  "ancho": 40,
+  "alto": 51,
+  "pie": 0.531
+ },
+ "caminata": {
+  "cuadros": 8,
+  "ancho": 46,
+  "alto": 51,
+  "pie": 0.551
+ },
+ "vuelta": {
+  "cuadros": 8,
+  "ancho": 45,
+  "alto": 53,
+  "pie": 0.525
+ },
+ "cansado": {
+  "cuadros": 5,
+  "ancho": 68,
+  "alto": 49,
+  "pie": 0.487
+ },
+ "fogata": {
+  "cuadros": 8,
+  "ancho": 64,
+  "alto": 41,
+  "pie": 0.503
+ },
+ "hechizo": {
+  "cuadros": 8,
+  "ancho": 177,
+  "alto": 49,
+  "pie": 0.214
+ }
+}

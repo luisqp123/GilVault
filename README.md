@@ -130,8 +130,9 @@ Para generar a mano el reporte de un mes, ejecuta `generarReporte('2026-10')` en
 npm test        # pruebas del intérprete de notificaciones y del backend (con Sheets simulado)
 npm run dev     # sirve la app en http://localhost:8000 (modo demo)
 npm run iconos  # regenera los íconos PNG desde el sprite del cofre
+python3 tools/extraer_heroe.py  # regenera las animaciones del aventurero desde arte/adventurero_sprite_sheet.svg
 ```
 
-Estructura: `apps-script/` (backend) · `app/` (PWA) · `tests/` · `tools/`.
+Estructura: `apps-script/` (backend) · `app/` (PWA) · `arte/` (hoja de sprites original del aventurero) · `tests/` · `tools/`.
 
 El estilo visual es un homenaje original a los JRPG de 16 bits: los sprites, el ícono y la interfaz son propios y no usan material de ningún juego existente.
